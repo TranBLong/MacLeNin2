@@ -3349,7 +3349,7 @@
               setTimeout(() => {
                 questions.shift();
                 loadQuestion();
-              }, 1500);
+              }, 2000);
             } else {
               div.classList.add("wrong");
               document.getElementById("result").innerText = "Sai rồi ❌";
@@ -3370,7 +3370,7 @@
 
               setTimeout(() => {
                 loadQuestion();
-              }, 3000);
+              }, 5000);
             }
 
             document.querySelectorAll(".answer").forEach((btn) => {
