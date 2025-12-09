@@ -3352,22 +3352,30 @@
               }, 800);
             } else {
               div.classList.add("wrong");
+              document.getElementById("result").innerText = "Sai rồi ❌";
 
-              // 🔥 Tìm đáp án đúng
-              let correctAnswer = q.a.find((item) => item.correct).text;
+              // ⭐ Hiện đáp án đúng bằng màu xanh
+              document.querySelectorAll(".answer").forEach((btn) => {
+                let txt = btn.innerText.trim();
+                let correctAns = q.a.find((x) => x.correct).text.trim();
 
-              // 🔥 Hiển thị đáp án đúng
-              document.getElementById("result").innerHTML =
-                "Sai rồi ❌<br><b>Đáp án đúng là:</b> " + correctAnswer;
+                if (txt === correctAns) {
+                  btn.classList.add("correct");
+                }
+              });
 
-              // Đưa câu sai xuống cuối danh sách
+              // Đưa câu sai xuống cuối hàng đợi
               let wrong = questions.shift();
               questions.push(wrong);
 
               setTimeout(() => {
                 loadQuestion();
-              }, 1500);
+              }, 1200);
             }
+
+            document.querySelectorAll(".answer").forEach((btn) => {
+              btn.style.pointerEvents = "none";
+            });
           };
 
           answersDiv.appendChild(div);
