@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Kinh Tế Chính Trị</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        #quiz-box {
+            background: white;
+            width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .answer {
+            margin: 8px 0;
+            padding: 10px;
+            background: #eee;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .answer:hover {
+            background: #ddd;
+        }
+        .correct {
+            background: #8ef58e !important;
+        }
+        .wrong {
+            background: #ff8e8e !important;
+        }
+        #settings {
+            width: 600px;
+            margin: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+        input {
+            padding: 5px;
+            width: 70px;
+        }
+        button {
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="settings">
+    <h3>Chọn khoảng câu hỏi</h3>
+    Từ câu <input type="number" id="from" value="1"> 
+    đến câu <input type="number" id="to" value="20">
+    <button onclick="startQuiz()">Bắt đầu</button>
+</div>
+
+<div id="quiz-box" style="display:none;">
+    <h2 id="question"></h2>
+    <div id="answers"></div>
+    <p id="result" style="font-weight:bold;"></p>
+</div>
+
+<script>
+    const allQuestions = [
+        // 1
+        {q:"Sản xuất hàng hoá xuất hiện dựa trên:", 
+         a:[
+            {text:"Phân công lao động cá biệt và chế độ tư hữu về tư liệu sản xuất.", correct:false},
+            {text:"Phân công lao động chung và chế độ sở hữu khác nhau về tư liệu sản xuất.", correct:false},
+            {text:"Phân công lao động và sự tách biệt về kinh tế giữa những người sản xuất.", correct:false},
+            {text:"Phân công lao động xã hội và chế độ tư hữu hoặc những hình thức sở hữu khác nhau về tư liệu sản xuất.", correct:true}
+         ]},
+        // 2
+        {q:"Nhận định nào về sản xuất hàng hóa là đúng?",
+         a:[
+            {text:"Sản xuất hàng hóa tồn tại khi có phân công lao động xã hội và sự tách biệt về mặt kinh tế giữa các chủ thể sản xuất.", correct:true},
+            {text:"Sản xuất hàng hóa là hình thức tổ chức sản xuất vĩnh viễn và tối ưu nhất.", correct:false},
+            {text:"Sản xuất hàng hóa không thể tồn tại ở các nước định hướng xã hội chủ nghĩa.", correct:false},
+            {text:"Sản xuất hàng hóa là hình thức tổ chức kinh tế của chủ nghĩa tư bản.", correct:false}
+         ]},
+        // 3
+        {q:"Hàng hóa là sản phẩm của lao động và:",
+         a:[
+            {text:"Trước khi đi vào tiêu dùng phải qua mua bán.", correct:true},
+            {text:"Thoả mãn nhu cầu cho xã hội.", correct:false},
+            {text:"Thỏa mãn nhu cầu cho người sản xuất.", correct:false},
+            {text:"Thoả mãn nhu cầu cho mọi người.", correct:false}
+         ]},
+        // 4
+        {q:"Giá trị của hàng hoá được quyết định bởi:",
+         a:[
+            {text:"Sự khan hiếm của hàng hoá.", correct:false},
+            {text:"Sự hao phí sức lao động của con người.", correct:false},
+            {text:"Lao động trừu tượng của người sản xuất kết tinh trong hàng hóa.", correct:true},
+            {text:"Công dụng của hàng hoá.", correct:false}
+         ]},
+        // 5
+        {q:"Quy luật giá trị có tác dụng:",
+         a:[
+            {text:"Thúc đẩy lực lượng sản xuất phát triển.", correct:false},
+            {text:"Cải tiến kỹ thuật, tăng năng suất lao động và phân hoá những người sản xuất.", correct:true},
+            {text:"Điều chỉnh linh hoạt việc phân bổ các nguồn lực.", correct:false},
+            {text:"Thúc đẩy năng lực thỏa mãn nhu cầu của xã hội.", correct:false}
+         ]},
+        // 6
+        {q:"Sản xuất hàng hoá tồn tại:",
+         a:[
+            {text:"Trong mọi xã hội.", correct:false},
+            {text:"Trong chế độ nô lệ, phong kiến, tư bản chủ nghĩa.", correct:false},
+            {text:"Trong các xã hội có phân công lao động xã hội và sự tách biệt về kinh tế giữa những người sản xuất.", correct:true},
+            {text:"Chỉ có trong chủ nghĩa tư bản.", correct:false}
+         ]},
+        // 7
+        {q:"Giá cả hàng hoá là:",
+         a:[
+            {text:"Giá trị của hàng hoá.", correct:false},
+            {text:"Quan hệ về lượng giữa hàng và tiền.", correct:false},
+            {text:"Tổng của chi phí sản xuất và lợi nhuận.", correct:false},
+            {text:"Biểu hiện bằng tiền của giá trị hàng hoá.", correct:true}
+         ]},
+        // 8
+        {q:"Hàng hoá là:",
+         a:[
+            {text:"Sản phẩm của lao động để thoả mãn nhu cầu của con người.", correct:false},
+            {text:"Sản phẩm của lao động có thể thoả mãn nhu cầu nào đó của con người thông qua mua bán.", correct:true},
+            {text:"Sản phẩm ở trên thị trường.", correct:false},
+            {text:"Sản phẩm được sản xuất ra để đem bán.", correct:false}
+         ]},
+        // 9
+        {q:"Quy luật giá trị là:",
+         a:[
+            {text:"Quy luật riêng của chủ nghĩa tư bản.", correct:false},
+            {text:"Quy luật cơ bản của sản xuất và trao đổi hàng hoá.", correct:true},
+            {text:"Quy luật kinh tế chung của mọi xã hội.", correct:false},
+            {text:"Quy luật kinh tế của thời kỳ quá độ lên chủ nghĩa xã hội.", correct:false}
+         ]},
+        // 10
+        {q:"Yếu tố quyết định đến giá cả hàng hoá là:",
+         a:[
+            {text:"Giá trị của hàng hoá.", correct:true},
+            {text:"Quan hệ cung cầu về hàng hóa.", correct:false},
+            {text:"Giá trị sử dụng của hàng hoá.", correct:false},
+            {text:"Mốt thời trang của hàng hoá.", correct:false}
+         ]},
+        // 11
+        {q:"Lao động trừu tượng là:",
+         a:[
+            {text:"Là phạm trù riêng của chủ nghĩa tư bản.", correct:false},
+            {text:"Là phạm trù của mọi nền kinh tế hàng hoá.", correct:true},
+            {text:"Là phạm trù riêng của kinh tế thị trường.", correct:false},
+            {text:"Là phạm trù chung của mọi nền kinh tế.", correct:false}
+         ]},
+        // 12
+        {q:"Lao động cụ thể là:",
+         a:[
+            {text:"Là phạm trù lịch sử.", correct:false},
+            {text:"Lao động tạo ra giá trị của hàng hoá.", correct:false},
+            {text:"Tạo ra giá trị sử dụng của hàng hoá.", correct:true},
+            {text:"Biểu hiện tính chất xã hội của người sản xuất hàng hoá.", correct:false}
+         ]},
+        // 13
+        {q:"Lượng giá trị xã hội của hàng hoá được quyết định bởi:",
+         a:[
+            {text:"Hao phí vật tư kỹ thuật.", correct:false},
+            {text:"Hao phí lao động cần thiết của người sản xuất hàng hoá.", correct:false},
+            {text:"Hao phí lao động sống của người sản xuất hàng hoá.", correct:false},
+            {text:"Thời gian lao động xã hội cần thiết.", correct:true}
+         ]},
+        // 14
+        {q:"Lượng giá trị của đơn vị hàng hoá thay đổi:",
+         a:[
+            {text:"Tỷ lệ thuận với năng suất lao động.", correct:false},
+            {text:"Tỷ lệ nghịch với cường độ lao động.", correct:false},
+            {text:"Tỷ lệ nghịch với năng suất lao động, không phụ thuộc vào cường độ lao động.", correct:true},
+            {text:"Tỷ lệ thuận với năng suất lao động, không phụ thuộc vào cường độ lao động.", correct:false}
+         ]},
+        // 15
+        {q:"Chọn ý đúng về tăng năng suất lao động: Khi tăng năng suất lao động thì:",
+         a:[
+            {text:"Số lượng hàng hoá làm ra trong 1 đơn vị thời gian tăng.", correct:true},
+            {text:"Tổng giá trị của hàng hoá giảm xuống.", correct:false},
+            {text:"Giá trị 1 đơn vị hàng hoá tăng lên.", correct:false},
+            {text:"Tổng giá trị của hàng hóa tăng", correct:false}
+         ]},
+        // 16
+        {q:"Khi tăng cường độ lao động sẽ xảy ra trường hợp nào dưới đây?",
+         a:[
+            {text:"Số lượng hàng hóa làm ra trong một đơn vị thời gian tăng lên.", correct:true},
+            {text:"Số lao động hao phí trong một đơn vị thời gian không đổi.", correct:false},
+            {text:"Giá trị một đơn vị hàng hóa tăng lên.", correct:false},
+            {text:"Giá trị một đơn vị hàng hóa giảm xuống.", correct:false}
+         ]},
+        // 17
+        {q:"Khi đồng thời tăng năng suất lao động và cường độ lao động lên 2 lần thì ý nào dưới đây là đúng?",
+         a:[
+            {text:"Tổng số hàng hoá tăng lên 4 lần, tổng số giá trị hàng hoá tăng lên 4 lần.", correct:false},
+            {text:"Tổng giá trị hàng hóa tăng 2 lần, tổng số hàng hóa tăng 2 lần.", correct:false},
+            {text:"Giá trị 1 hàng hóa giảm 2 lần, tổng giá trị hàng hóa tăng 2 lần.", correct:true},
+            {text:"Tổng số hàng hóa giảm 2 lần, giá trị 1 hàng hóa giảm 2 lần.", correct:false}
+         ]},
+        // 18
+        {q:"Hai hàng hoá trao đổi được với nhau vì:",
+         a:[
+            {text:"Chúng đều là sản phẩm của lao động.", correct:false},
+            {text:"Những người có hàng hóa ưa thích sản phẩm của nhau.", correct:false},
+            {text:"Có lượng hao phí vật tư kỹ thuật bằng nhau.", correct:false},
+            {text:"Chúng đều là sản phẩm của lao động và lượng thời gian hao phí lao động xã hội cần thiết để sản xuất ra chúng bằng nhau.", correct:true}
+         ]},
+        // 19
+        {q:"Nhận định nào sau đây không đúng về giá trị sử dụng của hàng hóa?",
+         a:[
+            {text:"Giá trị sử dụng là phạm trù lịch sử.", correct:true},
+            {text:"Giá trị sử dụng do cấu tạo vật chất của sản phẩm quy định.", correct:false},
+            {text:"Giá trị sử dụng được phát hiện dần cùng với nhận thức của con người.", correct:false},
+            {text:"Mỗi hàng hóa có thể có một hoặc nhiều giá trị sử dụng khác nhau.", correct:false}
+         ]},
+        // 20
+        {q:"Công dụng của vật phẩm do yếu tố nào quy định?",
+         a:[
+            {text:"Nhu cầu của người sử dụng.", correct:false},
+            {text:"Người sản xuất quyết định.", correct:false},
+            {text:"Giá cả hàng hoá.", correct:false},
+            {text:"Do thuộc tính tự nhiên.", correct:true}
+         ]},
+         // 21
+{ q: "Yếu tố nào được xác định là thực thể của giá trị hàng hoá?",
+  a: [
+    { text: "Lao động cụ thể.", correct: false },
+    { text: "Lao động giản đơn.", correct: false },
+    { text: "Lao động trừu tượng.", correct: true },
+    { text: "Lao động phức tạp.", correct: false }
+  ]
+},
+
+// 22
+{ q: "Giá trị hàng hoá được tạo ra từ đâu?",
+  a: [
+    { text: "Sản xuất.", correct: true },
+    { text: "Trao đổi.", correct: false },
+    { text: "Phân phối.", correct: false },
+    { text: "Sản xuất, phân phối và trao đổi.", correct: false }
+  ]
+},
+
+// 23
+{ q: "Giá trị và giá trị sử dụng có quan hệ như thế nào?",
+  a: [
+    { text: "Là hai thuộc tính khác nhau của hàng hóa, vừa thống nhất vừa đối lập nhau.", correct: true },
+    { text: "Giá trị sử dụng càng nhiều thì giá trị càng cao.", correct: false },
+    { text: "Không có mối quan hệ gì.", correct: false },
+    { text: "Giá trị sử dụng càng nhiều thì giá trị càng thấp.", correct: false }
+  ]
+},
+
+// 24
+{ q: "Tính chất hai mặt của lao động sản xuất hàng hoá là:",
+  a: [
+    { text: "Lao động tư nhân và lao động xã hội.", correct: false },
+    { text: "Lao động cụ thể và lao động trừu tượng.", correct: true },
+    { text: "Lao động giản đơn và lao động phức tạp.", correct: false },
+    { text: "Lao động quá khứ và lao động sống.", correct: false }
+  ]
+},
+
+// 25
+{ q: "Lao động cụ thể là:",
+  a: [
+    { text: "Là những việc làm cụ thể.", correct: false },
+    { text: "Là lao động có mục đích cụ thể.", correct: false },
+    { text: "Là lao động ở các ngành nghề cụ thể.", correct: false },
+    { text: "Là lao động ngành nghề, có mục đích riêng, đối tượng riêng, công cụ lao động riêng và kết quả riêng.", correct: true }
+  ]
+},
+
+// 26
+{ q: "Lao động cụ thể là nguồn gốc của:",
+  a: [
+    { text: "Giá trị sử dụng của hàng hóa.", correct: true },
+    { text: "Giá trị trao đổi.", correct: false },
+    { text: "Giá trị của hàng hóa.", correct: false },
+    { text: "Mọi của cải và giá trị sử dụng của hàng hóa.", correct: false }
+  ]
+},
+
+// 27
+{ q: "Lao động trừu tượng là gì?",
+  a: [
+    { text: "Là lao động không cụ thể.", correct: false },
+    { text: "Là lao động phức tạp.", correct: false },
+    { text: "Là lao động có trình độ cao, mất nhiều công đào tạo.", correct: false },
+    { text: "Là sự hao phí sức lao động của người sản xuất hàng hoá nói chung không tính đến những hình thức cụ thể.", correct: true }
+  ]
+},
+
+// 28
+{ q: "Lao động trừu tượng là nguồn gốc:",
+  a: [
+    { text: "Của tính hữu ích của hàng hoá.", correct: false },
+    { text: "Của giá trị sử dụng của hàng hóa.", correct: false },
+    { text: "Của giá trị hàng hoá.", correct: true },
+    { text: "Của việc trao đổi, mua bán hàng hóa.", correct: false }
+  ]
+},
+
+// 29
+{ q: "Thế nào là lao động giản đơn?",
+  a: [
+    { text: "Là lao động làm công việc đơn giản.", correct: false },
+    { text: "Là lao động làm ra các hàng hoá chất lượng không cao.", correct: false },
+    { text: "Là lao động chỉ làm một công đoạn của quá trình tạo ra hàng hoá.", correct: false },
+    { text: "Là lao động không cần trải qua đào tạo cũng có thể làm được.", correct: true }
+  ]
+},
+
+// 30
+{ q: "Thế nào là lao động phức tạp?",
+  a: [
+    { text: "Là lao động tạo ra các sản phẩm chất lượng cao, tinh vi.", correct: false },
+    { text: "Là lao động có nhiều thao tác phức tạp.", correct: false },
+    { text: "Là lao động phải trải qua đào tạo, huấn luyện mới làm được.", correct: true },
+    { text: "Là lao động có nhiều thao tác phức tạp để tạo ra sản phẩm chất lượng cao.", correct: false }
+  ]
+},
+
+// 31
+{ q: "Chọn một ý đúng trong các ý sau đây:",
+  a: [
+    { text: "Lao động của người kỹ sư có trình độ cao thuần tuý là lao động trừu tượng.", correct: false },
+    { text: "Lao động của người không qua đào tạo chỉ là lao động cụ thể.", correct: false },
+    { text: "Lao động của mọi người sản xuất hàng hóa đều có lao động cụ thể và lao động trừu tượng.", correct: true },
+    { text: "Tất cả các lao động sản xuất đều có lao động cụ thể và lao động trừu tượng.", correct: false }
+  ]
+},
+
+// 32
+{ q: "Công thức tính giá trị hàng hoá là: c + v + m. Ý nào là không đúng?",
+  a: [
+    { text: "Lao động cụ thể bảo toàn và chuyển giá trị tư liệu sản xuất (c) sang sản phẩm.", correct: false },
+    { text: "Lao động trừu tượng tạo ra giá trị mới (v+m).", correct: false },
+    { text: "Lao động trừu tượng không có khả năng bảo toàn và chuyển giá trị tư liệu sản xuất (c) sang sản phẩm.", correct: false },
+    { text: "Lao động trừu tượng tạo nên toàn bộ giá trị (c + v + m).", correct: true }
+  ]
+},
+
+// 33
+{ q: "Thế nào là năng suất lao động? Chọn ý đúng:",
+  a: [
+    { text: "Là hiệu quả, khả năng của lao động trừu tượng.", correct: false },
+    { text: "Là mức hao phí lao động trong một đơn vị thời gian.", correct: false },
+    { text: "Được tính bằng thời gian hao phí để sản xuất ra một đơn vị sản phẩm.", correct: false },
+    { text: "Là hiệu quả của lao động cụ thể và được tính bằng mức hao phí lao động trong một đơn vị thời gian.", correct: true }
+  ]
+},
+
+// 34
+{ q: "Thế nào là tăng năng suất lao động?",
+  a: [
+    { text: "Số sản phẩm làm ra trong một đơn vị thời gian tăng lên khi các điều kiện khác không đổi.", correct: true },
+    { text: "Thời gian để làm ra một sản phẩm không đổi.", correct: false },
+    { text: "Tổng số sản phẩm làm ra trong một đơn vị thời gian tăng lên còn tổng số giá trị giảm xuống.", correct: false },
+    { text: "Tổng số giá trị cũng tăng lên.", correct: false }
+  ]
+},
+
+// 35
+{ q: "Quan hệ giữa tăng năng suất lao động (NSLĐ) với giá trị hàng hoá.",
+  a: [
+    { text: "NSLĐ tăng lên thì lượng giá trị mới (v+m) của đơn vị hàng hoá không thay đổi.", correct: false },
+    { text: "NSLĐ tăng lên thì giá trị đơn vị hàng hoá giảm.", correct: true },
+    { text: "NSLĐ tăng lên thì giá trị đơn vị hàng hóa cũng tăng lên.", correct: false },
+    { text: "NSLĐ tăng lên không ảnh hưởng.", correct: false }
+  ]
+},
+
+// 36
+{ q: "Nhân tố nào ảnh hưởng đến năng suất lao động?",
+  a: [
+    { text: "Trình độ tay nghề thành thạo của người lao động.", correct: true },
+    { text: "Cách thức phân phối kết quả sản xuất.", correct: false },
+    { text: "Công tác tổ chức.", correct: false },
+    { text: "Kỷ luật lao động.", correct: false }
+  ]
+},
+
+// 37
+{ q: "Tăng năng suất lao động và tăng cường độ lao động giống nhau ở:",
+  a: [
+    { text: "Đều làm giảm giá trị đơn vị hàng hoá.", correct: false },
+    { text: "Đều làm tăng số lượng sản phẩm sản xuất ra trong một đơn vị thời gian.", correct: true },
+    { text: "Đều làm tăng lượng lao động hao phí.", correct: false },
+    { text: "Đều áp dụng khoa học, công nghệ.", correct: false }
+  ]
+},
+
+// 38
+{ q: "Mâu thuẫn cơ bản của lao động sản xuất hàng hóa là gì?",
+  a: [
+    { text: "Mâu thuẫn giữa lao động tư nhân và lao động xã hội.", correct: true },
+    { text: "Mâu thuẫn giữa giá trị sử dụng và giá trị của hàng hóa.", correct: false },
+    { text: "Mâu thuẫn giữa giá trị và giá cả của hàng hóa.", correct: false },
+    { text: "Mâu thuẫn giữa lao động giản đơn và lao động phức tạp.", correct: false }
+  ]
+},
+
+// 39
+{ q: "Giá cả của hàng hoá được quyết định bởi:",
+  a: [
+    { text: "Giá trị của hàng hoá.", correct: true },
+    { text: "Giá trị sử dụng của hàng hóa.", correct: false },
+    { text: "Trình độ kỹ thuật.", correct: false },
+    { text: "Quan hệ cung - cầu.", correct: false }
+  ]
+},
+
+// 40
+{ q: "Tiền có 5 chức năng. Chức năng nào không đòi hỏi có tiền vàng?",
+  a: [
+    { text: "Chức năng thước đo giá trị.", correct: false },
+    { text: "Chức năng phương tiện lưu thông và phương tiện thanh toán.", correct: true },
+    { text: "Chức năng phương tiện cất trữ.", correct: false },
+    { text: "Chức năng thước đo giá trị và phương tiện cất trữ.", correct: false }
+  ]
+},
+// 41
+{
+  q: "Sản xuất và lưu thông hàng hoá chịu sự chi phối của những quy luật kinh tế nào?",
+  a: [
+    { text: "Quy luật giá trị thặng dư.", correct: false },
+    { text: "Quy luật cạnh tranh và quy luật cung cầu.", correct: true },
+    { text: "Quy luật lưu thông.", correct: false },
+    { text: "Quy luật mâu thuẫn.", correct: false }
+  ]
+},
+
+// 42
+{
+  q: "Tiền tệ là:",
+  a: [
+    { text: "Thước đo giá trị của hàng hoá.", correct: false },
+    { text: "Phương tiện để lưu thông hàng hoá và để thanh toán.", correct: false },
+    { text: "Là hàng hoá đặc biệt đóng vai trò là vật ngang giá chung.", correct: true },
+    { text: "Là vàng, bạc.", correct: false }
+  ]
+},
+
+// 43
+{
+  q: "Sự hoạt động của quy luật giá trị được biểu hiện:",
+  a: [
+    { text: "Giá cả thị trường xoay quanh giá trị cá biệt của hàng hoá.", correct: false },
+    { text: "Giá cả thị trường xoay quanh giá cả sản xuất.", correct: false },
+    { text: "Giá cả thị trường xoay quanh giá trị trao đổi.", correct: true },
+    { text: "Giá cả thị trường do lượng cung hàng hóa quyết định.", correct: false }
+  ]
+},
+
+// 44
+{
+  q: "Quan hệ giữa giá cả và giá trị. Ý đúng là:",
+  a: [
+    { text: "Giá trị là cơ sở của giá cả, là yếu tố quyết định giá cả.", correct: true },
+    { text: "Giá cả là cơ sở, là yếu tố quyết định giá trị.", correct: false },
+    { text: "Giá cả độc lập với giá trị.", correct: false },
+    { text: "Giá trị là một phần của giá cả.", correct: false }
+  ]
+},
+
+// 45
+{
+  q: "Chọn ý đúng về quan hệ cung - cầu đối với giá trị, giá cả:",
+  a: [
+    { text: "Quyết định giá trị và giá cả hàng hoá.", correct: false },
+    { text: "Chỉ quyết định đến giá cả và có ảnh hưởng đến giá trị.", correct: false },
+    { text: "Không có ảnh hưởng đến giá trị và giá cả.", correct: false },
+    { text: "Có ảnh hưởng tới giá cả thị trường.", correct: true }
+  ]
+},
+
+// 46
+{
+  q: "Chọn các ý không đúng về sản phẩm và hàng hoá:",
+  a: [
+    { text: "Mọi sản phẩm đều là hàng hoá.", correct: true },
+    { text: "Mọi hàng hoá đều là sản phẩm.", correct: false },
+    { text: "Mọi sản phẩm đều là kết quả của sản xuất.", correct: false },
+    { text: "Không phải mọi sản phẩm đều là hàng hoá.", correct: false }
+  ]
+},
+
+// 47
+{
+  q: "Giá trị của hàng hoá được quyết định bởi:",
+  a: [
+    { text: "Công dụng của hàng hoá.", correct: false },
+    { text: "Quan hệ cung - cầu về hàng hoá.", correct: false },
+    { text: "Lao động xã hội của người sản xuất hàng hoá.", correct: true },
+    { text: "Hao phí lao động của người sản xuất.", correct: false }
+  ]
+},
+
+// 48
+{
+  q: "Giá cả của hàng hoá là:",
+  a: [
+    { text: "Sự thoả thuận giữa người mua và người bán.", correct: false },
+    { text: "Sự biểu hiện bằng tiền của giá trị.", correct: true },
+    { text: "Số tiền người mua phải trả cho người bán.", correct: false },
+    { text: "Giá tiền đã in trên sản phẩm hoặc người bán quy định.", correct: false }
+  ]
+},
+
+// 49
+{
+  q: "Phát biểu nào sau đây là không đúng về quy luật giá trị?",
+  a: [
+    { text: "Quy luật giá trị điều tiết cả sản xuất và lưu thông hàng hóa.", correct: false },
+    { text: "Quy luật giá trị thúc đẩy tăng năng suất lao động, phát triển lực lượng sản xuất.", correct: false },
+    { text: "Quy luật giá trị làm giảm sự bất bình đẳng trong phân phối thu nhập.", correct: true },
+    { text: "Quy luật giá trị làm cho hàng hóa lưu chuyển từ nơi giá thấp đến nơi giá cao.", correct: false }
+  ]
+},
+
+// 50
+{
+  q: "Nhận định nào sau đây là không đúng về sự điều tiết sản xuất của quy luật giá trị?",
+  a: [
+    { text: "Hao phí lao động cá biệt phù hợp với hao phí lao động xã hội.", correct: false },
+    { text: "Hao phí lao động cá biệt càng thấp hơn hao phí lao động xã hội càng tốt.", correct: false },
+    { text: "Hao phí lao động cá biệt càng cao hơn hao phí lao động xã hội càng tốt.", correct: true },
+    { text: "Hao phí lao động cá biệt của người sản xuất có số lượng sản phẩm cung ứng tuyệt đại bộ phận hàng hóa cho thị trường.", correct: false }
+  ]
+},
+
+// 51
+{
+  q: "Khi tăng năng suất lao động, trường hợp nào dưới đây không đúng?",
+  a: [
+    { text: "c có thể giữ nguyên, có thể tăng, có thể giảm.", correct: false },
+    { text: "(v+ m) giảm.", correct: false },
+    { text: "(c+ v+ m) giảm.", correct: false },
+    { text: "(c + v + m) không đổi.", correct: true }
+  ]
+},
+
+// 52
+{
+  q: "Những đối tượng nào dưới đây không được mua bán trên thị trường chứng khoán?",
+  a: [
+    { text: "Cổ phiếu, trái phiếu.", correct: false },
+    { text: "Bất động sản.", correct: true },
+    { text: "Công trái, kỳ phiếu.", correct: false },
+    { text: "Trái phiếu, kỳ phiếu.", correct: false }
+  ]
+},
+
+// 53
+{
+  q: "Giá cả thị trường của hàng hoá xoay quanh yếu tố nào?",
+  a: [
+    { text: "Giá trị thị trường.", correct: true },
+    { text: "Giá trị hàng hoá.", correct: false },
+    { text: "Giá cả sản xuất.", correct: false },
+    { text: "Quan hệ cung cầu hàng hóa.", correct: false }
+  ]
+},
+
+// 54
+{
+  q: "Cổ phiếu và trái phiếu đều là hình thức đầu tư. Chọn ý đúng:",
+  a: [
+    { text: "Đều là đầu tư trực tiếp, dài hạn.", correct: false },
+    { text: "Đều là đầu tư gián tiếp, ngắn hạn.", correct: false },
+    { text: "Cổ phiếu là đầu tư trực tiếp còn trái phiếu là đầu tư gián tiếp.", correct: true },
+    { text: "Cổ phiếu là đầu tư gián tiếp còn trái phiếu là đầu tư trực tiếp.", correct: false }
+  ]
+},
+
+// 55
+{
+  q: "Ý kiến nào đúng về lao động trừu tượng?",
+  a: [
+    { text: "Là phạm trù riêng của chủ nghĩa tư bản.", correct: false },
+    { text: "Là phạm trù của mọi nền kinh tế hàng hoá.", correct: true },
+    { text: "Là phạm trù riêng của kinh tế thị trường.", correct: false },
+    { text: "Là phạm trù chung của mọi nền kinh tế.", correct: false }
+  ]
+},
+
+// 56
+{
+  q: "Khi tiền tệ dùng làm trung gian cho trao đổi hàng hóa thì nó thực hiện chức năng nào?",
+  a: [
+    { text: "Thước đo giá trị.", correct: false },
+    { text: "Phương tiện lưu thông.", correct: true },
+    { text: "Phương tiện cất trữ.", correct: false },
+    { text: "Phương tiện thanh toán.", correct: false }
+  ]
+},
+
+// 57
+{
+  q: "Lượng giá trị của đơn vị hàng hóa thay đổi phụ thuộc vào nhiều yếu tố. Ý đúng:",
+  a: [
+    { text: "Tỷ lệ thuận với năng suất lao động.", correct: false },
+    { text: "Tỷ lệ nghịch với cường độ lao động.", correct: false },
+    { text: "Tỷ lệ nghịch với năng suất lao động.", correct: true },
+    { text: "Phụ thuộc cả năng suất và cường độ lao động.", correct: false }
+  ]
+},
+
+// 58
+{
+  q: "Khi tăng năng suất lao động, trường hợp nào sau đây không đúng?",
+  a: [
+    { text: "Số lượng hàng hoá làm ra tăng.", correct: false },
+    { text: "Tổng giá trị hàng hoá tăng.", correct: true },
+    { text: "Tổng giá trị hàng hoá không đổi.", correct: false },
+    { text: "Giá trị 1 đơn vị hàng hoá giảm.", correct: false }
+  ]
+},
+
+// 59
+{
+  q: "Cặp phạm trù nào dưới đây là phát hiện riêng của C.Mác?",
+  a: [
+    { text: "Lao động tư nhân và lao động xã hội.", correct: false },
+    { text: "Lao động giản đơn và lao động phức tạp.", correct: false },
+    { text: "Lao động cụ thể và lao động trừu tượng.", correct: true },
+    { text: "Lao động quá khứ và lao động sống.", correct: false }
+  ]
+},
+
+// 60
+{
+  q: "Ý kiến nào dưới đây đúng?",
+  a: [
+    { text: "Lao động cụ thể có trước lao động trừu tượng.", correct: false },
+    { text: "Lao động của kỹ sư giỏi là lao động trừu tượng.", correct: false },
+    { text: "Lao động của người chưa qua đào tạo là lao động cụ thể.", correct: false },
+    { text: "Lao động của mọi người sản xuất đều gồm lao động cụ thể và lao động trừu tượng.", correct: true }
+  ]
+},
+// 61
+{
+  q: "Nhận xét về sự giống nhau giữa tăng năng suất lao động và tăng cường độ lao động, ý kiến nào dưới đây đúng?",
+  a: [
+    { text: "Đều làm giảm giá trị của đơn vị hàng hoá.", correct: false },
+    { text: "Đều không làm thay đổi giá trị của đơn vị hàng hoá.", correct: false },
+    { text: "Đều làm cho số sản phẩm sản xuất ra trong một đơn vị thời gian tăng lên.", correct: true },
+    { text: "Đều làm tăng lượng lao động hao phí trong một đơn vị sản phẩm.", correct: false }
+  ]
+},
+
+// 62
+{
+  q: "Ý kiến nào không đúng về quan hệ giữa tăng năng suất lao động (NSLĐ) với giá trị hàng hoá?",
+  a: [
+    { text: "Tăng NSLĐ làm cho giá trị của tổng số hàng hoá làm ra trong 1 đơn vị thời gian thay đổi.", correct: true },
+    { text: "Tăng NSLĐ làm giảm giá trị 1 đơn vị hàng hoá.", correct: false },
+    { text: "Giá trị 1 đơn vị hàng hoá tỷ lệ nghịch với NSLĐ", correct: false },
+    { text: "Tăng NSLĐ sẽ làm cho tổng số hàng hóa được sản xuất ra tăng lên.", correct: false }
+  ]
+},
+
+// 63
+{
+  q: "Ý kiến nào dưới đây đúng về bản chất của tiền tệ?",
+  a: [
+    { text: "Tiền tệ là tiền do nhà nước phát hành, vàng, ngoại tệ.", correct: false },
+    { text: "Là phương tiện để trao đổi hàng hoá và để thanh toán.", correct: false },
+    { text: "Là hàng hoá đặc biệt, đóng vai trò là vật ngang giá chung.", correct: true },
+    { text: "Là thước đo giá trị của hàng hoá.", correct: false }
+  ]
+},
+
+// 64
+{
+  q: "Phát biểu nào đúng về công thức chung của tư bản?",
+  a: [
+    { text: "Công thức chung của tư bản là H – T – H’.", correct: false },
+    { text: "Công thức chung của tư bản là T – H – T’.", correct: true },
+    { text: "Công thức chung của tư bản chỉ đúng trong ngành công nghiệp.", correct: false },
+    { text: "Công thức chung của tư bản cho thấy mua bán trao đổi là nguồn gốc của giá trị thặng dư.", correct: false }
+  ]
+},
+
+// 65
+{
+  q: "Thuộc tính nào của hàng hóa sức lao động được xem là chìa khóa để giải quyết mâu thuẫn trong công thức chung của tư bản?",
+  a: [
+    { text: "Thuộc tính giá trị sử dụng.", correct: true },
+    { text: "Thuộc tính giá trị.", correct: false },
+    { text: "Cả hai thuộc tính giá trị và giá trị sử dụng.", correct: false },
+    { text: "Không thuộc tính nào.", correct: false }
+  ]
+},
+
+// 66
+{
+  q: "Điều kiện sức lao động trở thành hàng hóa là gì?",
+  a: [
+    { text: "Người lao động phải được tự do về thân thể", correct: false },
+    { text: "Người lao động phải bị tước đoạt hết mọi tư liệu sản xuất", correct: false },
+    { text: "Người lao động phải được tự do về thân thể và bị tước đoạt hết mọi tư liệu sản xuất", correct: true },
+    { text: "Người lao động không có việc làm", correct: false }
+  ]
+},
+
+// 67
+{
+  q: "Tư bản là:",
+  a: [
+    { text: "Tiền và máy móc thiết bị.", correct: false },
+    { text: "Tiền có khả năng đẻ ra tiền.", correct: false },
+    { text: "Giá trị mang lại giá trị thặng dư bằng cách bóc lột lao động làm thuê.", correct: true },
+    { text: "Công cụ sản xuất và nguyên vật liệu.", correct: false }
+  ]
+},
+
+// 68
+{
+  q: "Sức lao động trở thành hàng hoá một cách phổ biến từ khi nào?",
+  a: [
+    { text: "Từ khi có sản xuất hàng hóa.", correct: false },
+    { text: "Từ xã hội chiếm hữu nô lệ.", correct: false },
+    { text: "Từ khi có kinh tế thị trường.", correct: false },
+    { text: "Từ khi có chủ nghĩa tư bản.", correct: true }
+  ]
+},
+
+// 69
+{
+  q: "Cấu thành lượng giá trị hàng hóa sức lao động bao gồm:",
+  a: [
+    { text: "Giá trị những tư liệu sinh hoạt cần thiết đáp ứng về vật chất và tinh thần cho bản thân và con cái của người lao động, chi phí đào tạo công nhân.", correct: true },
+    { text: "Giá trị những tư liệu sinh hoạt cần thiết để đáp ứng nhu cầu của bản thân người lao động.", correct: false },
+    { text: "Giá trị những tư liệu sinh hoạt cần thiết cho bản thân công nhân và chi phí đào tạo công nhân.", correct: false },
+    { text: "Giá trị những tư liệu sinh hoạt cần thiết đáp ứng về vật chất và tinh thần cho bản thân người lao động và chi phí đào tạo họ.", correct: false }
+  ]
+},
+
+// 70
+{
+  q: "Tư bản bất biến (c) là:",
+  a: [
+    { text: "Giá trị của nó chuyển dần vào sản phẩm qua khấu hao.", correct: false },
+    { text: "Giá trị của nó lớn lên trong quá trình sản xuất.", correct: false },
+    { text: "Giá trị của nó không thay đổi về lượng và được chuyển nguyên vẹn sang sản phẩm.", correct: true },
+    { text: "Giá trị của nó không thay đổi và được chuyển ngay sang sản phẩm sau một chu kỳ sản xuất.", correct: false }
+  ]
+},
+
+// 71
+{
+  q: "Trong quá trình sản xuất giá trị thặng dư, phát biểu nào sai về vai trò của tư bản bất biến?",
+  a: [
+    { text: "Là tư bản dùng để mua sức lao động, có lượng lớn hơn thông qua quá trình sản xuất, hay nó mang về giá trị thặng dư.", correct: true },
+    { text: "Là tư bản mà giá trị của nó được bảo toàn và dịch chuyển vào giá trị của sản phẩm.", correct: false },
+    { text: "Tư bản bất biến là điều kiện không thể thiếu để sản xuất giá trị thặng dư nhưng nó không sinh ra giá trị thặng dư.", correct: false },
+    { text: "Tư bản tồn tại dưới dạng máy móc, thiết bị và nguyên vật liệu, nó không tạo ra giá trị thặng dư.", correct: false }
+  ]
+},
+
+// 72
+{
+  q: "Tư bản cố định và tư bản lưu động thuộc phạm trù tư bản nào?",
+  a: [
+    { text: "Tư bản sản xuất.", correct: true },
+    { text: "Tư bản tiền tệ.", correct: false },
+    { text: "Tư bản bất biến.", correct: false },
+    { text: "Tư bản ứng trước.", correct: false }
+  ]
+},
+
+// 73
+{
+  q: "Mục đích trực tiếp của nền sản xuất tư bản chủ nghĩa (TBCN) là:",
+  a: [
+    { text: "Sản xuất ra ngày càng nhiều của cải vật chất.", correct: false },
+    { text: "Mở rộng phạm vi thống trị của quan hệ sản xuất TBCN.", correct: false },
+    { text: "Tạo ra ngày càng nhiều giá trị thặng dư.", correct: true },
+    { text: "Làm cho lao động ngày càng lệ thuộc vào tư bản.", correct: false }
+  ]
+},
+
+// 74
+{
+  q: "Khi nào tiền tệ biến thành tư bản?",
+  a: [
+    { text: "Có lượng tiền tệ đủ lớn.", correct: false },
+    { text: "Sức lao động trở thành hàng hoá.", correct: true },
+    { text: "Dùng tiền đầu tư vào sản xuất kinh doanh", correct: false },
+    { text: "Dùng tiền để buôn bán mua rẻ, bán đắt.", correct: false }
+  ]
+},
+
+// 75
+{
+  q: "Chọn định nghĩa chính xác về tư bản:",
+  a: [
+    { text: "Tư bản là giá trị mang lại giá trị thặng dư.", correct: false },
+    { text: "Tư bản là tiền và tư liệu sản xuất của nhà tư bản để tạo ra giá trị thặng dư.", correct: false },
+    { text: "Tư bản là giá trị đem lại giá trị thặng dư bằng cách bóc lột lao động làm thuê.", correct: true },
+    { text: "Tư bản là tiền đẻ ra tiền.", correct: false }
+  ]
+},
+
+// 76
+{
+  q: "Trong quá trình sản xuất giá trị thặng dư, giá trị tư liệu sản xuất đã tiêu dùng sẽ như thế nào? Trường hợp nào sai?",
+  a: [
+    { text: "Được tái sản xuất.", correct: false },
+    { text: "Không được tái sản xuất.", correct: true },
+    { text: "Được bù đắp", correct: false },
+    { text: "Được lao động cụ thể của người sản xuất hàng hoá bảo tồn và chuyển vào giá trị của sản phẩm mới.", correct: false }
+  ]
+},
+
+// 77
+{
+  q: "Tư bản bất biến (c) và tư bản khả biến (v) có vai trò thế nào trong quá trình sản xuất giá trị thặng dư? Chọn các ý không đúng dưới đây:",
+  a: [
+    { text: "Tư bản bất biến (c) là điều kiện để sản xuất giá trị thặng dư.", correct: false },
+    { text: "Tư bản khả biến (v) là nguồn gốc của giá trị thặng dư.", correct: false },
+    { text: "Cả c và v có vai trò nhất định trong quá trình tạo ra giá trị thặng dư.", correct: false },
+    { text: "Tư bản khả biến (v) là nguồn gốc tạo ra giá trị thặng dư, còn tư bản bất biến (c) không có vai trò gì.", correct: true }
+  ]
+},
+
+// 78
+{
+  q: "Tỷ suất giá trị thặng dư (m') phản ánh điều gì? Chọn ý đúng:",
+  a: [
+    { text: "Trình độ bóc lột của tư bản đối với công nhân làm thuê.", correct: true },
+    { text: "Hiệu quả của tư bản.", correct: false },
+    { text: "Chỉ cho nhà tư bản biết nơi đầu tư có lợi.", correct: false },
+    { text: "Quy mô bóc lột của nhà tư bản đối với công nhân làm thuê.", correct: false }
+  ]
+},
+
+// 79
+{
+  q: "Phương pháp sản xuất giá trị thặng dư tuyệt đối và phương pháp sản xuất giá trị thặng dư tương đối có điểm nào giống nhau?",
+  a: [
+    { text: "Đều làm cho công nhân tốn sức lao động nhiều hơn.", correct: false },
+    { text: "Đều làm giảm giá trị sức lao động của công nhân.", correct: false },
+    { text: "Đều làm tăng tỷ suất giá trị thặng dư", correct: true },
+    { text: "Đều không làm thay đổi thời gian lao động.", correct: false }
+  ]
+},
+
+// 80
+{
+  q: "Từ định nghĩa phương pháp sản xuất giá trị thặng dư tuyệt đối, hãy xác định phương án đúng dưới đây:",
+  a: [
+    { text: "Độ dài ngày lao động bằng ngày tự nhiên", correct: false },
+    { text: "Độ dài ngày lao động lớn hơn không", correct: false },
+    { text: "Độ dài ngày lao động bằng thời gian lao động cần thiết", correct: false },
+    { text: "Độ dài ngày lao động lớn hơn thời gian lao động cần thiết", correct: true }
+  ]
+},
+// 81
+{
+  q: "Khi xem xét phương pháp sản xuất giá trị thặng dư tuyệt đối, những ý nào dưới đây không đúng?",
+  a: [
+    { text: "Giá trị sức lao động không đổi.", correct: false },
+    { text: "Ngày lao động thay đổi.", correct: false },
+    { text: "Thời gian lao động cần thiết thay đổi.", correct: true },
+    { text: "Thời gian lao động thặng dư thay đổi.", correct: false }
+  ]
+},
+
+// 82
+{
+  q: "Giới hạn tối thiểu của ngày lao động là bao nhiêu?",
+  a: [
+    { text: "Đủ bù đắp giá trị sức lao động của công nhân.", correct: false },
+    { text: "Do nhà tư bản quy định.", correct: false },
+    { text: "Bằng thời gian lao động cần thiết.", correct: true },
+    { text: "Lớn hơn thời gian lao động cần thiết", correct: false }
+  ]
+},
+
+// 83
+{
+  q: "Vai trò của máy móc trong quá trình tạo ra giá trị thặng dư?",
+  a: [
+    { text: "Máy móc là nguồn gốc của giá trị thặng dư.", correct: false },
+    { text: "Máy móc là tiền đề vật chất cho việc tạo ra giá trị thặng dư.", correct: true },
+    { text: "Máy móc và sức lao động đều tạo ra giá trị thặng dư.", correct: false },
+    { text: "Máy móc là yếu tố quyết định để tạo ra giá trị thặng dư.", correct: false }
+  ]
+},
+
+// 84
+{
+  q: "Tiền công tư bản chủ nghĩa là:",
+  a: [
+    { text: "Giá trị của lao động.", correct: false },
+    { text: "Sự trả công cho lao động.", correct: false },
+    { text: "Giá trị sức lao động.", correct: false },
+    { text: "Giá cả của sức lao động.", correct: true }
+  ]
+},
+
+// 85
+{
+  q: "Giá trị thặng dư là gì?",
+  a: [
+    { text: "Lợi nhuận thu được của người sản xuất kinh doanh.", correct: false },
+    { text: "Giá trị của tư bản tự tăng lên.", correct: false },
+    { text: "Phần giá trị mới dôi ra ngoài giá trị sức lao động do công nhân tạo ra.", correct: true },
+    { text: "Hiệu số giữa giá trị hàng hoá với chi phí sản xuất.", correct: false }
+  ]
+},
+
+// 86
+{
+  q: "Sự phân chia tư bản thành tư bản bất biến và tư bản khả biến là để biết:",
+  a: [
+    { text: "Đặc điểm chuyển giá trị của từng loại tư bản vào sản phẩm.", correct: false },
+    { text: "Vai trò của lao động quá khứ và lao động sống.", correct: false },
+    { text: "Nguồn gốc của giá trị thặng dư.", correct: true },
+    { text: "Vai trò của từng loại tư bản trong việc tạo ra giá trị hàng hóa.", correct: false }
+  ]
+},
+
+// 87
+{
+  q: "Chọn ý không đúng về lợi nhuận:",
+  a: [
+    { text: "Là hình thức biến tướng của giá trị thặng dư.", correct: false },
+    { text: "Là giá trị thặng dư được coi là con đẻ của tư bản ứng trước.", correct: false },
+    { text: "Là hiệu số giữa tổng doanh thu trừ đi tổng chi phí.", correct: true },
+    { text: "Là chênh lệch giữa giá trị hàng hóa và chi phí sản xuất.", correct: false }
+  ]
+},
+
+// 88
+{
+  q: "Cơ sở chung của giá trị thặng dư tương đối và giá trị thặng dư siêu ngạch là:",
+  a: [
+    { text: "Tăng năng suất lao động.", correct: true },
+    { text: "Tăng năng suất lao động xã hội.", correct: false },
+    { text: "Tăng năng suất cá biệt.", correct: false },
+    { text: "Giảm giá trị sức lao động.", correct: false }
+  ]
+},
+
+// 89
+{
+  q: "Chọn các ý không đúng về lợi nhuận và giá trị thặng dư:",
+  a: [
+    { text: "Bản chất của lợi nhuận là giá trị thặng dư.", correct: false },
+    { text: "Lợi nhuận và giá trị thặng dư luôn luôn bằng nhau.", correct: true },
+    { text: "Giá trị thặng dư được hình thành từ sản xuất còn lợi nhuận trên thị trường.", correct: false },
+    { text: "Bản chất của lợi nhuận và giá trị thặng dư là lao động không công.", correct: false }
+  ]
+},
+
+// 90
+{
+  q: "Hình thức tiền công nào không phải là cơ bản?",
+  a: [
+    { text: "Tiền công tính theo thời gian.", correct: false },
+    { text: "Tiền công danh nghĩa.", correct: true },
+    { text: "Tiền công tính theo sản phẩm.", correct: false },
+    { text: "Tiền công theo thời gian và theo sản phẩm.", correct: false }
+  ]
+},
+
+// 91
+{
+  q: "Tiêu chí nào là cơ bản để xác định chính xác tiền công?",
+  a: [
+    { text: "Số lượng tiền công.", correct: false },
+    { text: "Tiền công tháng.", correct: false },
+    { text: "Tiền công ngày.", correct: false },
+    { text: "Tiền công giờ.", correct: true }
+  ]
+},
+
+// 92
+{
+  q: "Người lao động nhận khoán công việc nhận tiền sau khi hoàn thành là:",
+  a: [
+    { text: "Tiền công theo thời gian.", correct: false },
+    { text: "Tiền công thực tế.", correct: false },
+    { text: "Tiền công danh nghĩa.", correct: false },
+    { text: "Tiền công theo sản phẩm.", correct: true }
+  ]
+},
+
+// 93
+{
+  q: "Quan hệ giữa tiền công theo thời gian và theo sản phẩm:",
+  a: [
+    { text: "Không có quan hệ.", correct: false },
+    { text: "Áp dụng cho công việc khác nhau.", correct: false },
+    { text: "Trả theo sản phẩm dễ quản lý hơn.", correct: false },
+    { text: "Tiền công theo sản phẩm là hình thức chuyển hóa của theo thời gian.", correct: true }
+  ]
+},
+
+// 94
+{
+  q: "Những ý kiến nào sau đây là sai?",
+  a: [
+    { text: "Tích luỹ tư bản là biến một phần giá trị thặng dư thành tư bản.", correct: false },
+    { text: "Nguồn gốc của tích luỹ tư bản là giá trị thặng dư.", correct: false },
+    { text: "Động cơ của tích luỹ cũng là giá trị thặng dư.", correct: false },
+    { text: "Tích luỹ tư bản là sự tiết kiệm tư bản.", correct: true }
+  ]
+},
+
+// 95
+{
+  q: "Tích tụ và tập trung tư bản giống nhau ở:",
+  a: [
+    { text: "Có nguồn gốc trực tiếp giống nhau.", correct: false },
+    { text: "Đều là tăng quy mô tư bản cá biệt.", correct: true },
+    { text: "Có vai trò quan trọng như nhau.", correct: false },
+    { text: "Đều là tăng quy mô tư bản xã hội.", correct: false }
+  ]
+},
+
+// 96
+{
+  q: "Yếu tố nào không thuộc tư bản cố định?",
+  a: [
+    { text: "Nguyên vật liệu, điện, nước.", correct: true },
+    { text: "Máy móc, thiết bị.", correct: false },
+    { text: "Phương tiện vận tải.", correct: false },
+    { text: "Nhà kho, xưởng.", correct: false }
+  ]
+},
+
+// 97
+{
+  q: "Yếu tố nào thuộc tư bản lưu động?",
+  a: [
+    { text: "Đất đai làm mặt bằng sản xuất.", correct: false },
+    { text: "Tiền lương.", correct: true },
+    { text: "Máy móc, thiết bị.", correct: false },
+    { text: "Nhà xưởng.", correct: false }
+  ]
+},
+
+// 98
+{
+  q: "Căn cứ chia tư bản thành tư bản bất biến và khả biến:",
+  a: [
+    { text: "Tốc độ chu chuyển.", correct: false },
+    { text: "Vai trò trong quá trình sản xuất giá trị thặng dư.", correct: true },
+    { text: "Phương thức chuyển giá trị.", correct: false },
+    { text: "Hao mòn hữu hình/vô hình.", correct: false }
+  ]
+},
+
+// 99
+{
+  q: "Căn cứ để chia tư bản thành cố định và lưu động:",
+  a: [
+    { text: "Tốc độ chu chuyển.", correct: false },
+    { text: "Phương thức chuyển giá trị sang sản phẩm.", correct: true },
+    { text: "Vai trò trong sản xuất giá trị thặng dư.", correct: false },
+    { text: "Sự thay đổi về lượng.", correct: false }
+  ]
+},
+
+// 100
+{
+  q: "Dấu hiệu nào không thuộc hao mòn hữu hình?",
+  a: [
+    { text: "Giảm khả năng sử dụng.", correct: false },
+    { text: "Do sử dụng.", correct: false },
+    { text: "Tác động của tự nhiên.", correct: false },
+    { text: "Khấu hao nhanh.", correct: true }
+  ]
+},
+// 101
+{
+  q: "Hãy nhận dạng những dấu hiệu nào không thuộc phạm trù hao mòn vô hình:",
+  a: [
+    { text: "Khấu hao nhanh.", correct: true },
+    { text: "Xuất hiện máy móc mới công suất lớn hơn, giá rẻ hơn.", correct: false },
+    { text: "Máy móc bị giảm giá ngay cả khi còn mới.", correct: false },
+    { text: "Máy móc bị lỗi thời.", correct: false }
+  ]
+},
+
+// 102
+{
+  q: "Lợi nhuận có nguồn gốc từ:",
+  a: [
+    { text: "Lao động phức tạp.", correct: false },
+    { text: "Lao động cụ thể.", correct: false },
+    { text: "Lao động quá khứ.", correct: false },
+    { text: "Lao động không được trả công.", correct: true }
+  ]
+},
+
+// 103
+{
+  q: "Khi hàng hoá bán đúng giá trị thì:",
+  a: [
+    { text: "p = m", correct: true },
+    { text: "p > m", correct: false },
+    { text: "p < m", correct: false },
+    { text: "p = 0", correct: false }
+  ]
+},
+
+// 104
+{
+  q: "Tỷ suất lợi nhuận phản ánh:",
+  a: [
+    { text: "Trình độ bóc lột của tư bản.", correct: false },
+    { text: "Hiệu quả của tư bản đầu tư.", correct: true },
+    { text: "Nghệ thuật quản lý của tư bản.", correct: false },
+    { text: "Tài năng kinh doanh của tư bản.", correct: false }
+  ]
+},
+
+// 105
+{
+  q: "Quy luật giá cả sản xuất là biểu hiện hoạt động của:",
+  a: [
+    { text: "Quy luật giá trị.", correct: true },
+    { text: "Quy luật cạnh tranh.", correct: false },
+    { text: "Quy luật giá trị thặng dư.", correct: false },
+    { text: "Quy luật cung - cầu.", correct: false }
+  ]
+},
+
+// 106
+{
+  q: "Lợi nhuận thương nghiệp có được là do bán hàng hoá với mức giá:",
+  a: [
+    { text: "Cao hơn giá trị.", correct: false },
+    { text: "Bằng chi phí sản xuất tư bản chủ nghĩa.", correct: false },
+    { text: "Bằng giá trị.", correct: true },
+    { text: "Thấp hơn giá trị.", correct: false }
+  ]
+},
+
+// 107
+{
+  q: "Lợi tức là một phần của:",
+  a: [
+    { text: "Lợi nhuận.", correct: false },
+    { text: "Lợi nhuận siêu ngạch.", correct: false },
+    { text: "Lợi nhuận bình quân.", correct: true },
+    { text: "Lợi nhuận ngân hàng.", correct: false }
+  ]
+},
+
+// 108
+{
+  q: "Tín dụng thương mại tư bản chủ nghĩa sử dụng phương tiện thanh toán là:",
+  a: [
+    { text: "Cổ phiếu.", correct: false },
+    { text: "Trái phiếu.", correct: false },
+    { text: "Kỳ phiếu.", correct: true },
+    { text: "Công trái.", correct: false }
+  ]
+},
+
+// 109
+{
+  q: "Lợi nhuận ngân hàng được xác định theo:",
+  a: [
+    { text: "Tỷ suất lợi nhuận.", correct: false },
+    { text: "Tỷ suất giá trị thặng dư.", correct: false },
+    { text: "Tỷ suất lợi nhuận bình quân.", correct: false },
+    { text: "Tỷ suất lợi tức.", correct: true }
+  ]
+},
+
+// 110
+{
+  q: "Lợi nhuận bình quân phụ thuộc vào:",
+  a: [
+    { text: "Tỷ suất lợi nhuận bình quân.", correct: true },
+    { text: "Tỷ suất giá trị thặng dư.", correct: false },
+    { text: "Tỷ suất lợi nhuận.", correct: false },
+    { text: "Tỷ suất lợi tức.", correct: false }
+  ]
+},
+
+// 111
+{
+  q: "Nhân tố nào dưới đây có ảnh hưởng ngược chiều với tỷ suất lợi nhuận?",
+  a: [
+    { text: "Tỷ suất giá trị thặng dư.", correct: false },
+    { text: "Tốc độ chu chuyển của tư bản.", correct: false },
+    { text: "Cấu tạo hữu cơ của tư bản.", correct: true },
+    { text: "Khối lượng giá trị thặng dư.", correct: false }
+  ]
+},
+
+// 112
+{
+  q: "Địa tô tư bản chủ nghĩa là phần còn lại sau khi khấu trừ:",
+  a: [
+    { text: "Lợi nhuận.", correct: false },
+    { text: "Lợi nhuận siêu ngạch.", correct: false },
+    { text: "Lợi nhuận độc quyền.", correct: false },
+    { text: "Lợi nhuận bình quân.", correct: true }
+  ]
+},
+
+// 113
+{
+  q: "Trong chủ nghĩa tư bản, giá cả nông phẩm được xác định theo giá cả của nông phẩm ở loại đất nào?",
+  a: [
+    { text: "Đất tốt.", correct: false },
+    { text: "Đất trung bình.", correct: false },
+    { text: "Đất xấu.", correct: true },
+    { text: "Mức trung bình của các loại đất xấu.", correct: false }
+  ]
+},
+
+// 114
+{
+  q: "Tốc độ chu chuyển của tư bản tăng lên thì tỷ suất lợi nhuận sẽ:",
+  a: [
+    { text: "Tăng lên.", correct: true },
+    { text: "Giảm xuống.", correct: false },
+    { text: "Không đổi.", correct: false },
+    { text: "Tùy điều kiện cụ thể.", correct: false }
+  ]
+},
+
+// 115
+{
+  q: "Nhân tố nào dưới đây không ảnh hưởng đến tỷ suất lợi nhuận?",
+  a: [
+    { text: "Tỷ suất giá trị thặng dư.", correct: false },
+    { text: "Tốc độ chu chuyển của tư bản.", correct: false },
+    { text: "Cấu tạo hữu cơ của tư bản.", correct: false },
+    { text: "Cạnh tranh.", correct: true }
+  ]
+},
+
+// 116
+{
+  q: "Trong giai đoạn chủ nghĩa tư bản tự do cạnh tranh, quy luật giá trị thặng dư biểu hiện thành:",
+  a: [
+    { text: "Quy luật giá cả sản xuất.", correct: false },
+    { text: "Quy luật tích lũy tư bản.", correct: false },
+    { text: "Quy luật tỷ suất lợi nhuận bình quân.", correct: true },
+    { text: "Quy luật lợi nhuận độc quyền cao.", correct: false }
+  ]
+},
+
+// 117
+{
+  q: "Lợi nhuận là:",
+  a: [
+    { text: "Tỷ lệ phần lãi trên tổng số tư bản.", correct: false },
+    { text: "Là tiền công mà doanh nhân tự trả cho mình.", correct: false },
+    { text: "Là hình thức biến tướng của giá trị thặng dư.", correct: true },
+    { text: "Là hiệu số giữa giá trị hàng hoá và chi phí sản xuất.", correct: false }
+  ]
+},
+
+// 118
+{
+  q: "Những nhận xét dưới đây không đúng về tư bản cố định?",
+  a: [
+    { text: "Là nguồn gốc của giá trị thặng dư.", correct: true },
+    { text: "Là điều kiện để giảm giá trị hàng hoá.", correct: false },
+    { text: "Là điều kiện tăng năng suất lao động.", correct: false },
+    { text: "Là bộ phận chủ yếu của tư bản bất biến.", correct: false }
+  ]
+},
+
+// 119
+{
+  q: "Ý kiến nào dưới đây không đúng về hàng hoá sức lao động?",
+  a: [
+    { text: "Bán chịu.", correct: false },
+    { text: "Mua bán có thời hạn.", correct: false },
+    { text: "Giá cả = giá trị mới do sức lao động tạo ra.", correct: true },
+    { text: "Giá trị sử dụng quyết định giá trị.", correct: false }
+  ]
+},
+
+// 120
+{
+  q: "Nhận định nào dưới đây không đúng?",
+  a: [
+    { text: "Người bán và người mua sức lao động đều bình đẳng về mặt pháp lý.", correct: false },
+    { text: "Sức lao động được mua bán không theo quy luật giá trị.", correct: true },
+    { text: "Thị trường sức lao động được hình thành trong chủ nghĩa tư bản.", correct: false },
+    { text: "Sức lao động là hàng hoá gắn với kết quả sử dụng nó lại phủ định cơ sở quy luật giá trị.", correct: false }
+  ]
+},
+// 121
+{
+  q: "Sản xuất giá trị thặng dư tuyệt đối và giá trị thặng dư tương đối giống nhau ở điểm nào?",
+  a: [
+    { text: "Đều làm cho công nhân tốn sức lao động nhiều hơn.", correct: false },
+    { text: "Đều làm giảm giá trị sức lao động của công nhân.", correct: false },
+    { text: "Đều làm tăng tỷ suất giá trị thặng dư.", correct: true },
+    { text: "Đều giảm thời gian lao động tất yếu.", correct: false }
+  ]
+},
+
+// 122
+{
+  q: "Những ý kiến dưới đây không đúng về sản xuất giá trị thặng dư tương đối?",
+  a: [
+    { text: "Ngày lao động không đổi", correct: false },
+    { text: "Giá trị sức lao động không đổi.", correct: true },
+    { text: "Hạ thấp giá trị sức lao động.", correct: false },
+    { text: "Tỷ suất giá trị thặng dư thay đổi.", correct: false }
+  ]
+},
+
+// 123
+{
+  q: "Khái niệm nào dưới đây không đúng về lợi nhuận?",
+  a: [
+    { text: "Lợi nhuận là hình thức biến tướng của giá trị thặng dư.", correct: false },
+    { text: "Là giá trị thặng dư được coi là con đẻ của tư bản ứng trước.", correct: false },
+    { text: "Là hiệu số giữa tổng doanh thu trừ đi tổng chi phí.", correct: true },
+    { text: "Là hiệu số giữa giá trị hàng hoá và chi phí sản xuất.", correct: false }
+  ]
+},
+
+// 124
+{
+  q: "Tiền công thực tế thay đổi theo chiều hướng khác nhau. Chiều hướng nào dưới đây không đúng?",
+  a: [
+    { text: "Tỷ lệ thuận với tiền công danh nghĩa", correct: false },
+    { text: "Tỷ lệ nghịch với giá trị tư liệu tiêu dùng và dịch vụ.", correct: false },
+    { text: "Tỷ lệ thuận với lạm phát.", correct: true },
+    { text: "Tỷ lệ nghịch với lạm phát.", correct: false }
+  ]
+},
+
+// 125
+{
+  q: "Chủ nghĩa tư bản độc quyền là:",
+  a: [
+    { text: "Một phương thức sản xuất mới.", correct: false },
+    { text: "Một hình thái kinh tế - xã hội.", correct: false },
+    { text: "Một giai đoạn phát triển của phương thức sản xuất tư bản chủ nghĩa.", correct: true },
+    { text: "Một nấc thang phát triển của lực lượng sản xuất.", correct: false }
+  ]
+},
+
+// 126
+{
+  q: "Nguyên nhân ra đời của chủ nghĩa tư bản độc quyền là:",
+  a: [
+    { text: "Do cuộc đấu tranh của giai cấp công nhân và nhân dân lao động.", correct: false },
+    { text: "Do sự can thiệp của nhà nước tư sản.", correct: false },
+    { text: "Do tư bản đẩy nhanh quá trình tích tụ và tập trung sản xuất dưới tác động của cách mạng khoa học - công nghệ.", correct: true },
+    { text: "Do tư bản muốn tăng cường bóc lột giai cấp công nhân.", correct: false }
+  ]
+},
+
+// 127
+{
+  q: "Sự hình thành các tổ chức độc quyền dựa trên cơ sở:",
+  a: [
+    { text: "Sản xuất nhỏ phân tán.", correct: false },
+    { text: "Tích tụ tập trung sản xuất và sự ra đời của các xí nghiệp quy mô lớn.", correct: true },
+    { text: "Sự xuất hiện các thành tựu mới của khoa học.", correct: false },
+    { text: "Sự hoàn thiện quan hệ sản xuất tư bản chủ nghĩa.", correct: false }
+  ]
+},
+
+// 128
+{
+  q: "Sự ra đời của tư bản tài chính là kết quả của sự phát triển:",
+  a: [
+    { text: "Độc quyền ngân hàng.", correct: false },
+    { text: "Sự phát triển của thị trường tài chính.", correct: false },
+    { text: "Độc quyền công nghiệp.", correct: false },
+    { text: "Quá trình xâm nhập liên kết độc quyền ngân hàng với độc quyền công nghiệp.", correct: true }
+  ]
+},
+
+// 129
+{
+  q: "Vai trò mới của ngân hàng trong giai đoạn chủ nghĩa tư bản độc quyền là:",
+  a: [
+    { text: "Đầu tư tư bản.", correct: false },
+    { text: "Trung tâm tín dụng.", correct: false },
+    { text: "Khống chế hoạt động của nền kinh tế tư bản chủ nghĩa.", correct: true },
+    { text: "Trung tâm thanh toán.", correct: false }
+  ]
+},
+
+// 130
+{
+  q: "Trong giai đoạn chủ nghĩa tư bản độc quyền có những hình thức cạnh tranh nào?",
+  a: [
+    { text: "Cạnh tranh giữa tổ chức độc quyền với xí nghiệp ngoài độc quyền", correct: false },
+    { text: "Cạnh tranh giữa các tổ chức độc quyền với nhau", correct: false },
+    { text: "Cạnh tranh trong nội bộ tổ chức độc quyền", correct: false },
+    { text: "Cạnh tranh trong nội bộ, giữa các tổ chức độc quyền và giữa tổ chức độc quyền với xí nghiệp ngoài độc quyền.", correct: true }
+  ]
+},
+
+// 131
+{
+  q: "Vì sao trong chủ nghĩa tư bản độc quyền cạnh tranh không bị thủ tiêu?",
+  a: [
+    { text: "Vì các tổ chức độc quyền cạnh tranh với nhau.", correct: false },
+    { text: "Vì tổ chức độc quyền cạnh tranh với các công ty ngoài độc quyền.", correct: false },
+    { text: "Vì các xí nghiệp trong nội bộ tổ chức độc quyền cạnh tranh với nhau.", correct: false },
+    { text: "Vì cạnh tranh là quy luật khách quan của kinh tế hàng hoá.", correct: true }
+  ]
+},
+
+// 132
+{
+  q: "Chọn mệnh đề đúng:",
+  a: [
+    { text: "Độc quyền là con đẻ của cạnh tranh, đối lập với cạnh tranh và thủ tiêu cạnh tranh", correct: false },
+    { text: "Độc quyền là con đẻ của cạnh tranh, đối lập với cạnh tranh nhưng không thủ tiêu cạnh tranh.", correct: true },
+    { text: "Cạnh tranh sinh ra độc quyền, chúng không đối lập nhau.", correct: false },
+    { text: "Cạnh tranh và độc quyền không có quan hệ gì với nhau.", correct: false }
+  ]
+},
+
+// 133
+{
+  q: "Biện pháp cạnh tranh mà tổ chức độc quyền thường sử dụng đối với các xí nghiệp ngoài độc quyền:",
+  a: [
+    { text: "Thương lượng.", correct: false },
+    { text: "Thôn tính.", correct: false },
+    { text: "Phân chia thị trường, nguồn nguyên liệu…", correct: true },
+    { text: "Độc chiếm nguồn nguyên liệu, sức lao động,…", correct: false }
+  ]
+},
+
+// 134
+{
+  q: "Kết quả cạnh tranh trong nội bộ ngành:",
+  a: [
+    { text: "Hình thành giá trị thị trường.", correct: false },
+    { text: "Hình thành tỷ suất lợi nhuận bình quân.", correct: false },
+    { text: "Hình thành giá cả sản xuất.", correct: true },
+    { text: "Hình thành lợi nhuận bình quân.", correct: false }
+  ]
+},
+
+// 135
+{
+  q: "Mục đích cạnh tranh trong nội bộ tổ chức độc quyền là:",
+  a: [
+    { text: "Giành thị phần.", correct: false },
+    { text: "Giành tỷ lệ sản xuất cao hơn.", correct: false },
+    { text: "Giành thị phần và tỷ lệ sản xuất cao hơn.", correct: true },
+    { text: "Thôn tính nhau.", correct: false }
+  ]
+},
+
+// 136
+{
+  q: "Kết quả cạnh tranh giữa các tổ chức độc quyền trong cùng một ngành là:",
+  a: [
+    { text: "Một sự thoả hiệp.", correct: false },
+    { text: "Hai bên cùng phát triển.", correct: false },
+    { text: "Một bên phá sản.", correct: false },
+    { text: "Một sự thỏa hiệp hoặc một bên phá sản.", correct: true }
+  ]
+},
+
+// 137
+{
+  q: "Khi chủ nghĩa tư bản độc quyền ra đời sẽ:",
+  a: [
+    { text: "Phủ định các quy luật trong giai đoạn CNTB tự do cạnh tranh.", correct: false },
+    { text: "Phủ định các quy luật kinh tế của sản xuất hàng hoá.", correct: false },
+    { text: "Làm cho các quy luật kinh tế của sản xuất hàng hoá và của CNTB có hình thức biểu hiện mới.", correct: true },
+    { text: "Không làm thay đổi các quy luật kinh tế nói chung.", correct: false }
+  ]
+},
+
+// 138
+{
+  q: "Trong giai đoạn chủ nghĩa độc quyền:",
+  a: [
+    { text: "Quy luật giá trị không còn hoạt động.", correct: false },
+    { text: "Quy luật giá trị lúc hoạt động, lúc không hoạt động.", correct: false },
+    { text: "Quy luật giá trị vẫn hoạt động.", correct: true },
+    { text: "Quy luật giá trị hoạt động kém hiệu quả.", correct: false }
+  ]
+},
+
+// 139
+{
+  q: "Các tổ chức độc quyền sử dụng giá cả độc quyền để:",
+  a: [
+    { text: "Chiếm đoạt giá trị thặng dư của người khác.", correct: true },
+    { text: "Gây thiệt hại cho các đối thủ cạnh tranh.", correct: false },
+    { text: "Khống chế thị trường.", correct: false },
+    { text: "Củng cố vai trò tổ chức độc quyền.", correct: false }
+  ]
+},
+
+// 140
+{
+  q: "Trong thời kỳ chủ nghĩa tư bản độc quyền, quan hệ giá trị và giá cả hàng hoá sẽ thế nào nếu xét toàn bộ hệ thống kinh tế tư bản chủ nghĩa?",
+  a: [
+    { text: "Tổng giá cả > tổng giá trị.", correct: false },
+    { text: "Tổng giá cả < tổng giá trị.", correct: false },
+    { text: "Tổng giá cả = Tổng giá trị.", correct: true },
+    { text: "Tổng giá cả và Tổng giá trị không có quan hệ.", correct: false }
+  ]
+},
+// 141
+{
+  q: "Trong giai đoạn chủ nghĩa tư bản độc quyền, quy luật giá trị có biểu hiện mới, thành:",
+  a: [
+    { text: "Quy luật giá cả sản xuất.", correct: false },
+    { text: "Quy luật giá cả độc quyền.", correct: true },
+    { text: "Quy luật lợi nhuận độc quyền.", correct: false },
+    { text: "Quy luật lợi nhuận bình quân.", correct: false }
+  ]
+},
+
+// 142
+{
+  q: "Trong giai đoạn chủ nghĩa tư bản độc quyền, quy luật giá trị thặng dư biểu hiện thành:",
+  a: [
+    { text: "Quy luật giá cả độc quyền.", correct: false },
+    { text: "Quy luật lợi nhuận độc quyền cao.", correct: true },
+    { text: "Quy luật lợi nhuận bình quân.", correct: false },
+    { text: "Quy luật giá cả sản xuất.", correct: false }
+  ]
+},
+
+// 143
+{
+  q: "Nguyên nhân hình thành tỷ suất lợi nhuận bình quân:",
+  a: [
+    { text: "Do cạnh tranh.", correct: false },
+    { text: "Do chạy theo giá trị thặng dư.", correct: false },
+    { text: "Do cạnh tranh giữa các ngành.", correct: true },
+    { text: "Do cạnh tranh trong nội bộ ngành.", correct: false }
+  ]
+},
+
+// 144
+{
+  q: "Nguyên nhân hình thành lợi nhuận độc quyền là:",
+  a: [
+    { text: "Do cạnh tranh nội bộ ngành.", correct: false },
+    { text: "Do sự thèm khát giá trị thặng dư của các nhà tư bản.", correct: false },
+    { text: "Do địa vị độc quyền đem lại.", correct: true },
+    { text: "Do cạnh tranh giữa các tổ chức độc quyền.", correct: false }
+  ]
+},
+
+// 145
+{
+  q: "Chọn các ý sai về quan hệ giá cả độc quyền với giá trị:",
+  a: [
+    { text: "Giá cả độc quyền > giá trị.", correct: false },
+    { text: "Giá cả độc quyền < giá trị.", correct: false },
+    { text: "Giá cả độc quyền thoát ly giá trị.", correct: true },
+    { text: "Giá cả độc quyền vẫn dựa trên cơ sở giá trị.", correct: false }
+  ]
+},
+
+// 146
+{
+  q: "Đâu không phải là nguồn gốc của lợi nhuận độc quyền cao?",
+  a: [
+    { text: "Lao động không công của công nhân trong xí nghiệp độc quyền.", correct: false },
+    { text: "Phần lao động không công của công nhân trong xí nghiệp ngoài độc quyền.", correct: false },
+    { text: "Phần giá trị thặng dư của các xí nghiệp tư bản vừa, nhỏ.", correct: false },
+    { text: "Lao động của tư bản trong các tổ chức độc quyền.", correct: true }
+  ]
+},
+
+// 147
+{
+  q: "Chủ nghĩa tư bản độc quyền nhà nước ra đời không phải do nguyên nhân nào dưới đây?",
+  a: [
+    { text: "Trình độ xã hội hoá cao của lực lượng sản xuất.", correct: false },
+    { text: "Do sự khống chế nền kinh tế của các tổ chức độc quyền.", correct: false },
+    { text: "Xu hướng quốc tế hoá kinh tế.", correct: false },
+    { text: "Do mâu thuẫn cơ bản của chủ nghĩa tư bản.", correct: true }
+  ]
+},
+
+// 148
+{
+  q: "Nhà nước tư sản đảm nhận đầu tư vào ngành nào?",
+  a: [
+    { text: "Đầu tư lớn, thu hồi vốn nhanh, lợi nhuận ít.", correct: false },
+    { text: "Đầu tư không lớn, thu hồi vốn nhanh, lợi nhuận cao.", correct: false },
+    { text: "Đầu tư lớn, thu hồi vốn chậm, lợi nhuận cao.", correct: false },
+    { text: "Đầu tư lớn, thu hồi vốn chậm, lợi nhuận ít.", correct: true }
+  ]
+},
+
+// 149
+{
+  q: "Trong thời kỳ chủ nghĩa tư bản độc quyền, mâu thuẫn giữa giai cấp tư sản và vô sản sẽ như thế nào?",
+  a: [
+    { text: "Không thay đổi.", correct: false },
+    { text: "Có phần được hài hòa hơn trước.", correct: false },
+    { text: "Ngày càng sâu sắc hơn.", correct: true },
+    { text: "Đời sống của giai cấp công nhân và nhân dân lao động dần dần được cải thiện hơn.", correct: false }
+  ]
+},
+
+// 150
+{
+  q: "Sự xuất hiện của chủ nghĩa tư bản độc quyền nhà nước làm cho:",
+  a: [
+    { text: "Mâu thuẫn giai cấp vô sản và tư sản giảm đi.", correct: false },
+    { text: "Làm hạn chế tác động tiêu cực của độc quyền.", correct: false },
+    { text: "Làm cho mâu thuẫn trên sâu sắc hơn.", correct: true },
+    { text: "Cả a, b, c", correct: false }
+  ]
+},
+
+// 151
+{
+  q: "Bản chất của chủ nghĩa tư bản độc quyền nhà nước là:",
+  a: [
+    { text: "Sự kết hợp tổ chức độc quyền tư nhân và nhà nước tư sản.", correct: true },
+    { text: "Nhà nước tư sản can thiệp vào kinh tế, chi phối độc quyền.", correct: false },
+    { text: "Các tổ chức độc quyền phụ thuộc vào nhà nước.", correct: false },
+    { text: "Sự thoả hiệp giữa nhà nước và tổ chức độc quyền.", correct: false }
+  ]
+},
+
+// 152
+{
+  q: "Sự ra đời của chủ nghĩa tư bản độc quyền nhà nước nhằm mục đích:",
+  a: [
+    { text: "Phục vụ lợi ích của chủ nghĩa tư bản.", correct: false },
+    { text: "Phục vụ lợi ích của tổ chức độc quyền tư nhân.", correct: false },
+    { text: "Phục vụ lợi ích của nhà nước tư sản.", correct: false },
+    { text: "Phục vụ lợi ích của tổ chức độc quyền tư nhân và cứu nguy cho chủ nghĩa tư bản.", correct: true }
+  ]
+},
+
+// 153
+{
+  q: "Trong cơ chế của chủ nghĩa tư bản độc quyền nhà nước thì:",
+  a: [
+    { text: "Tổ chức độc quyền phụ thuộc vào nhà nước.", correct: false },
+    { text: "Nhà nước không phụ thuộc vào tổ chức độc quyền.", correct: false },
+    { text: "Nhà nước phụ thuộc vào tổ chức độc quyền.", correct: true },
+    { text: "Nhà nước chi phối tổ chức độc quyền.", correct: false }
+  ]
+},
+
+// 154
+{
+  q: "Chủ nghĩa tư bản độc quyền nhà nước là:",
+  a: [
+    { text: "Một quan hệ kinh tế, chính trị, xã hội.", correct: false },
+    { text: "Một kiểu tổ chức kinh tế - xã hội.", correct: true },
+    { text: "Một chính sách trong giai đoạn độc quyền.", correct: false },
+    { text: "Một cơ chế điều tiết của nhà nước tư sản.", correct: false }
+  ]
+},
+
+// 155
+{
+  q: "Sở hữu độc quyền nhà nước là sự kết hợp của:",
+  a: [
+    { text: "Sở hữu nhà nước và sở hữu tư nhân tư bản chủ nghĩa.", correct: false },
+    { text: "Sở hữu của nhà nước tư sản.", correct: false },
+    { text: "Sở hữu nhà nước và sở hữu độc quyền tư nhân.", correct: true },
+    { text: "Sở hữu của nhiều nước tư bản.", correct: false }
+  ]
+},
+
+// 156
+{
+  q: "Sở hữu nhà nước được hình thành không phải bằng cách nào dưới đây?",
+  a: [
+    { text: "Xây dựng xí nghiệp nhà nước bằng ngân sách.", correct: false },
+    { text: "Hợp nhất các xí nghiệp nhỏ của tư bản trong nền kinh tế.", correct: true },
+    { text: "Quốc hữu hoá", correct: false },
+    { text: "Mua cổ phần của doanh nghiệp tư nhân.", correct: false }
+  ]
+},
+
+// 157
+{
+  q: "Cơ chế kinh tế của chủ nghĩa tư bản độc quyền nhà nước gồm:",
+  a: [
+    { text: "Cơ chế thị trường và độc quyền tư nhân.", correct: false },
+    { text: "Độc quyền tư nhân và sự điều tiết của nhà nước.", correct: false },
+    { text: "Cơ chế thị trường, độc quyền tư nhân và sự can thiệp của nhà nước.", correct: true },
+    { text: "Cơ chế thị trường và sự điều tiết của nhà nước.", correct: false }
+  ]
+},
+
+// 158
+{
+  q: "Đặc điểm của chủ nghĩa tư bản ngày nay được biểu hiện ở:",
+  a: [
+    { text: "Sự xuất hiện các hình thức độc quyền mới.", correct: false },
+    { text: "Biểu hiện mới của CNTB độc quyền.", correct: false },
+    { text: "Biểu hiện mới của CNTB độc quyền nhà nước.", correct: false },
+    { text: "Biểu hiện mới về kinh tế của CNTB độc quyền và CNTB độc quyền nhà nước.", correct: true }
+  ]
+},
+
+// 159
+{
+  q: "Nguyên nhân xuất hiện độc quyền đa ngành là:",
+  a: [
+    { text: "Sự điều tiết của nhà nước.", correct: false },
+    { text: "Đối phó với luật chống độc quyền", correct: false },
+    { text: "Do kinh doanh đơn ngành dễ bị phá sản trong điều kiện cạnh tranh quyết liệt", correct: false },
+    { text: "Do luật chống độc quyền và kinh doanh đơn ngành dễ bị phá sản trong điều kiện cạnh tranh quyết liệt.", correct: true }
+  ]
+},
+
+// 160
+{
+  q: "Chọn các ý đúng dưới đây: trong chủ nghĩa tư bản độc quyền:",
+  a: [
+    { text: "Do độc quyền thống trị nên không còn cạnh tranh.", correct: false },
+    { text: "Vẫn còn cạnh tranh nhưng cạnh tranh đỡ gay gắt hơn.", correct: false },
+    { text: "Chỉ còn cạnh tranh giữa các ngành, không còn cạnh tranh trong nội bộ ngành.", correct: false },
+    { text: "Cạnh tranh có những hình thức mới.", correct: true }
+  ]
+},
+// 161
+{
+  q: "Mục tiêu cơ bản, quan trọng nhất của kinh tế thị trường định hướng xã hội ở Việt Nam:",
+  a: [
+    { text: "Thực hiện dân giàu, nước mạnh, dân chủ, công bằng, văn minh.", correct: true },
+    { text: "Phát triển kinh tế.", correct: false },
+    { text: "Xây dựng cơ sở vật chất.", correct: false },
+    { text: "Tăng trưởng kinh tế.", correct: false }
+  ]
+},
+
+// 162
+{
+  q: "Sự khác biệt cơ bản giữa kinh tế thị trường định hướng XHCN với kinh tế thị trường TBCN là:",
+  a: [
+    { text: "Có sự điều tiết của nhà nước XHCN.", correct: false },
+    { text: "Vai trò chủ đạo của kinh tế nhà nước.", correct: true },
+    { text: "Nền kinh tế nhiều thành phần.", correct: false },
+    { text: "Có nhiều hình thức sở hữu TLSX.", correct: false }
+  ]
+},
+
+// 163
+{
+  q: "Ở nước ta hiện nay tồn tại nhiều hình thức phân phối thu nhập vì:",
+  a: [
+    { text: "Còn tồn tại nhiều hình thức sở hữu tư liệu sản xuất.", correct: false },
+    { text: "Còn tồn tại nhiều thành phần kinh tế và hình thức tổ chức sản xuất kinh doanh.", correct: true },
+    { text: "Do lực lượng sản xuất có nhiều trình độ khác nhau.", correct: false },
+    { text: "Còn tồn tại nhiều kiểu quan hệ sản xuất khác nhau.", correct: false }
+  ]
+},
+
+// 164
+{
+  q: "Trong các nguyên tắc phân phối dưới đây, nguyên tắc nào là chủ yếu nhất ở nước ta hiện nay?",
+  a: [
+    { text: "Phân phối theo lao động", correct: true },
+    { text: "Phân phối theo kết quả sản xuất kinh doanh", correct: false },
+    { text: "Phân phối theo giá trị sức lao động", correct: false },
+    { text: "Phân phối theo vốn hay tài sản.", correct: false }
+  ]
+},
+
+// 165
+{
+  q: "Cơ chế thị trường là:",
+  a: [
+    { text: "Cơ chế điều tiết nền kinh tế tự phát", correct: false },
+    { text: "Cơ chế điều tiết nền kinh tế theo các quy luật kinh tế", correct: false },
+    { text: "Cơ chế điều tiết nền kinh tế theo các quy luật của kinh tế thị trường.", correct: true },
+    { text: "Cơ chế thị trường do 'bàn tay vô hình' chi phối.", correct: false }
+  ]
+},
+
+// 166
+{
+  q: "Hệ thống lợi ích kinh tế do nhân tố nào quyết định?",
+  a: [
+    { text: "Quan hệ sản xuất.", correct: true },
+    { text: "Lực lượng sản xuất.", correct: false },
+    { text: "Kiến trúc thượng tầng.", correct: false },
+    { text: "Phương thức sản xuất.", correct: false }
+  ]
+},
+
+// 167
+{
+  q: "Hình thức sở hữu đóng vai trò chủ đạo trong nền kinh tế nước ta hiện nay là gì?",
+  a: [
+    { text: "Sở hữu nhà nước.", correct: true },
+    { text: "Sở hữu tư nhân.", correct: false },
+    { text: "Sở hữu tập thể.", correct: false },
+    { text: "Sở hữu nước ngoài.", correct: false }
+  ]
+},
+
+// 168
+{
+  q: "Thế nào là sở hữu?",
+  a: [
+    { text: "Là quan hệ giữa người với người trong quá trình sản xuất và tái sản xuất xã hội trên cơ sở chiếm hữu nguồn lực sản xuất.", correct: true },
+    { text: "Là quan hệ giữa con người vào tự nhiên.", correct: false },
+    { text: "Là sự chiếm đoạt các nguồn lực xã hội.", correct: false },
+    { text: "Là quan hệ giữa con người với tự nhiên trong đó con người chiếm đoạt nguồn lực tự nhiên.", correct: false }
+  ]
+},
+
+// 169
+{
+  q: "Thành phần kinh tế nào đóng vai trò chủ đạo trong nền kinh tế thị trường định hướng xã hội chủ nghĩa ở Việt Nam?",
+  a: [
+    { text: "Kinh tế tư nhân.", correct: false },
+    { text: "Kinh tế tập thể.", correct: false },
+    { text: "Kinh tế có vốn đầu tư nước ngoài.", correct: false },
+    { text: "Kinh tế nhà nước.", correct: true }
+  ]
+},
+
+// 170
+{
+  q: "Thành phần kinh tế nào đóng vai trò là động lực quan trọng trong nền kinh tế thị trường định hướng xã hội chủ nghĩa ở Việt Nam?",
+  a: [
+    { text: "Kinh tế tư nhân.", correct: true },
+    { text: "Kinh tế tập thể.", correct: false },
+    { text: "Kinh tế có vốn đầu tư nước ngoài.", correct: false },
+    { text: "Kinh tế nhà nước.", correct: false }
+  ]
+},
+
+// 171
+{
+  q: "Thành phần kinh tế nào cùng với kinh tế nhà nước ngày càng trở thành nền tảng trong nền kinh tế thị trường định hướng xã hội chủ nghĩa ở Việt Nam?",
+  a: [
+    { text: "Kinh tế có vốn đầu tư nước ngoài.", correct: false },
+    { text: "Kinh tế nhà nước.", correct: false },
+    { text: "Kinh tế tập thể.", correct: true },
+    { text: "Kinh tế tư nhân.", correct: false }
+  ]
+},
+
+// 172
+{
+  q: "Quan hệ phân phối bị chi phối và quyết định bởi:",
+  a: [
+    { text: "Quan hệ chiếm đoạt.", correct: false },
+    { text: "Quan hệ sở hữu.", correct: true },
+    { text: "Quan hệ trao đổi.", correct: false },
+    { text: "Quan hệ quản lý.", correct: false }
+  ]
+},
+
+// 173
+{
+  q: "Đâu không phải là hình thức phân phối chủ yếu ở nước ta hiện nay?",
+  a: [
+    { text: "Phân phối theo kết quả lao động", correct: false },
+    { text: "Phân phối theo hiệu quả kinh tế", correct: false },
+    { text: "Phân phối theo an sinh và phúc lợi xã hội", correct: false },
+    { text: "Phân phối theo kết quả đầu ra.", correct: true }
+  ]
+},
+
+// 174
+{
+  q: "Biểu hiện nào dưới đây không đúng về vai trò chủ đạo của kinh tế nhà nước?",
+  a: [
+    { text: "Chiếm tỷ trọng lớn.", correct: true },
+    { text: "Nắm các ngành then chốt, các lĩnh vực quan trọng.", correct: false },
+    { text: "Là nhân tố chính thúc đẩy tăng trưởng kinh tế nhanh và bền vững.", correct: false },
+    { text: "Đi đầu trong ứng dụng tiến bộ khoa học - công nghệ.", correct: false }
+  ]
+},
+
+// 175
+{
+  q: "Thể chế là gì?",
+  a: [
+    { text: "Những quy tắc, pháp luật, bộ máy quản lý và cơ chế vận hành nhằm điều chỉnh hoạt động của con người trong một chế độ xã hội.", correct: true },
+    { text: "Những quy định do con người đặt ra.", correct: false },
+    { text: "Những nguyên tắc ứng xử nhằm điều chỉnh hành vi của con người.", correct: false },
+    { text: "Những quy định, nguyên tắc ứng xử nhằm điều chỉnh con người.", correct: false }
+  ]
+},
+
+// 176
+{
+  q: "Thể chế kinh tế là gì?",
+  a: [
+    { text: "Những quy tắc, pháp luật, bộ máy quản lý điều chỉnh hoạt động xã hội.", correct: false },
+    { text: "Hệ thống quy tắc, pháp luật, bộ máy quản lý và cơ chế vận hành điều chỉnh hành vi các chủ thể kinh tế.", correct: true },
+    { text: "Những quy định do con người đặt ra.", correct: false },
+    { text: "Những nguyên tắc ứng xử nhằm điều chỉnh hành vi của con người.", correct: false }
+  ]
+},
+
+// 177
+{
+  q: "Đâu không phải là lý do cần phải hoàn thiện thể chế kinh tế thị trường định hướng XHCN ở Việt Nam?",
+  a: [
+    { text: "Do thể chế kinh tế thị trường còn chưa đồng bộ.", correct: false },
+    { text: "Hệ thống thể chế còn chưa đầy đủ.", correct: false },
+    { text: "Hệ thống thể chế còn kém hiệu lực, hiệu quả.", correct: false },
+    { text: "Do con người mong muốn ngày càng hoàn thiện thể chế kinh tế thị trường.", correct: true }
+  ]
+},
+
+// 178
+{
+  q: "Lợi ích kinh tế là gì?",
+  a: [
+    { text: "Là lợi ích vật chất thu được khi thực hiện hoạt động kinh tế.", correct: true },
+    { text: "Là lợi ích thu được qua hoạt động tinh thần.", correct: false },
+    { text: "Là lợi ích thu được qua hoạt động xã hội.", correct: false },
+    { text: "Là lợi ích có được do chiếm đoạt của người khác.", correct: false }
+  ]
+},
+
+// 179
+{
+  q: "Đâu không phải là nhân tố ảnh hưởng đến quan hệ lợi ích kinh tế?",
+  a: [
+    { text: "Trình độ phát triển của lực lượng sản xuất.", correct: false },
+    { text: "Địa vị của các chủ thể trong quan hệ sản xuất.", correct: false },
+    { text: "Chính sách phân phối thu nhập và hội nhập quốc tế.", correct: false },
+    { text: "Mục đích hoạt động của con người khi tham gia kinh tế.", correct: true }
+  ]
+},
+// 180
+{
+  q: "Chọn ý sai trong các phương án sau:",
+  a: [
+    { text: "Lợi ích kinh tế của người sử dụng lao động và người lao động vừa thống nhất vừa mâu thuẫn.", correct: false },
+    { text: "Mục đích của người sử dụng lao động là lợi nhuận.", correct: false },
+    { text: "Mục đích của người sử dụng lao động là tạo ra nhiều việc làm cho người lao động.", correct: true },
+    { text: "Mục đích của người lao động là việc làm, tiền lương.", correct: false }
+  ]
+},
+
+// 181
+{
+  q: "Thực chất của công nghiệp hóa ở nước ta là gì?",
+  a: [
+    { text: "Thay lao động thủ công lạc hậu bằng lao động sử dụng máy móc có năng suất lao động xã hội cao.", correct: true },
+    { text: "Tái sản xuất mở rộng.", correct: false },
+    { text: "Cải thiện, nâng cao đời sống nhân dân.", correct: false },
+    { text: "Cả a, b, c.", correct: false }
+  ]
+},
+
+// 182
+{
+  q: "Đâu là động lực của công nghiệp hoá, hiện đại hoá?",
+  a: [
+    { text: "Con người.", correct: true },
+    { text: "Mở rộng quan hệ kinh tế quốc tế.", correct: false },
+    { text: "Khoa học – công nghệ.", correct: false },
+    { text: "Hiệu quả kinh tế - xã hội.", correct: false }
+  ]
+},
+
+// 183
+{
+  q: "Cơ cấu kinh tế nào là quan trọng nhất?",
+  a: [
+    { text: "Cơ cấu thành phần kinh tế.", correct: false },
+    { text: "Cơ cấu vùng kinh tế.", correct: false },
+    { text: "Cơ cấu ngành kinh tế.", correct: true },
+    { text: "Cơ cấu lĩnh vực kinh tế.", correct: false }
+  ]
+},
+
+// 184
+{
+  q: "Chủ trương trong quan hệ quốc tế của Việt Nam là:",
+  a: [
+    { text: "Muốn là bạn với tất cả các nước trong cộng đồng thế giới, phấn đấu vì hòa bình, độc lập và phát triển.", correct: false },
+    { text: "Đa phương hóa, đa dạng hóa quan hệ, chủ động và tích cực trong hội nhập quốc tế.", correct: false },
+    { text: "Sẵn sàng là bạn, là đối tác tin cậy của các nước trong cộng đồng quốc tế.", correct: false },
+    { text: "Kết hợp sức mạnh dân tộc với sức mạnh thời đại, chủ động và tích cực hội nhập quốc tế toàn diện, sâu rộng.", correct: true }
+  ]
+},
+
+// 185
+{
+  q: "Quá trình công nghiệp hoá làm cơ cấu lao động chuyển dịch. Ý nào sau đây không đúng?",
+  a: [
+    { text: "Lao động nông nghiệp giảm tuyệt đối và tương đối, lao động công nghiệp tăng tuyệt đối và tương đối.", correct: false },
+    { text: "Lao động nông nghiệp chỉ giảm tuyệt đối, lao động công nghiệp chỉ tăng tương đối.", correct: true },
+    { text: "Lao động ngành dịch vụ tăng nhanh hơn các ngành sản xuất vật chất.", correct: false },
+    { text: "Tỷ trọng lao động trí tuệ trong nền kinh tế tăng lên.", correct: false }
+  ]
+},
+
+// 186
+{
+  q: "Nhân loại đã trải qua bao nhiêu cuộc cách mạng công nghiệp?",
+  a: [
+    { text: "2", correct: false },
+    { text: "3", correct: false },
+    { text: "4", correct: true },
+    { text: "5", correct: false }
+  ]
+},
+
+// 187
+{
+  q: "Nội dung cơ bản của cách mạng công nghiệp lần thứ nhất:",
+  a: [
+    { text: "Sử dụng năng lượng nước và hơi nước để cơ khí hóa sản xuất.", correct: true },
+    { text: "Sử dụng năng lượng điện và động cơ điện để tạo ra dây chuyền sản xuất hàng loạt.", correct: false },
+    { text: "Sử dụng công nghệ thông tin và máy tính để tự động hóa sản xuất.", correct: false },
+    { text: "Liên kết giữa thực và ảo để làm việc thông minh và hiệu quả nhất.", correct: false }
+  ]
+},
+
+// 188
+{
+  q: "Nội dung cơ bản của cách mạng công nghiệp lần thứ hai:",
+  a: [
+    { text: "Sử dụng năng lượng nước và hơi nước để cơ khí hóa sản xuất.", correct: false },
+    { text: "Sử dụng năng lượng điện và động cơ điện để tạo ra dây chuyền sản xuất hàng loạt.", correct: true },
+    { text: "Sử dụng công nghệ thông tin và máy tính để tự động hóa sản xuất.", correct: false },
+    { text: "Liên kết giữa thực và ảo để thực hiện công việc thông minh.", correct: false }
+  ]
+},
+
+// 189
+{
+  q: "Nội dung cơ bản của cách mạng công nghiệp lần thứ ba:",
+  a: [
+    { text: "Sử dụng năng lượng nước và hơi nước để cơ khí hóa sản xuất.", correct: false },
+    { text: "Sử dụng năng lượng điện và động cơ điện để tạo ra dây chuyền sản xuất hàng loạt.", correct: false },
+    { text: "Sử dụng công nghệ thông tin và máy tính để tự động hóa sản xuất.", correct: true },
+    { text: "Liên kết giữa thực và ảo để làm việc thông minh.", correct: false }
+  ]
+},
+
+// 190
+{
+  q: "Nội dung cơ bản của cách mạng công nghiệp lần thứ tư:",
+  a: [
+    { text: "Cơ khí hóa bằng hơi nước.", correct: false },
+    { text: "Dây chuyền sản xuất hàng loạt.", correct: false },
+    { text: "Tự động hóa bằng máy tính.", correct: false },
+    { text: "Liên kết giữa thực và ảo để làm việc thông minh nhất.", correct: true }
+  ]
+},
+
+// 191
+{
+  q: "Vai trò của cách mạng công nghiệp:",
+  a: [
+    { text: "Thúc đẩy lực lượng sản xuất.", correct: false },
+    { text: "Thúc đẩy hoàn thiện quan hệ sản xuất.", correct: false },
+    { text: "Thúc đẩy đổi mới quản trị phát triển.", correct: false },
+    { text: "Tất cả đều đúng.", correct: true }
+  ]
+},
+
+// 192
+{
+  q: "Vai trò của cách mạng công nghiệp. Chọn phương án sai:",
+  a: [
+    { text: "Thúc đẩy lực lượng sản xuất.", correct: false },
+    { text: "Thúc đẩy hoàn thiện quan hệ sản xuất.", correct: false },
+    { text: "Thúc đẩy phân hóa giàu nghèo.", correct: true },
+    { text: "Thúc đẩy đổi mới quản trị phát triển.", correct: false }
+  ]
+},
+
+// 193
+{
+  q: "Mô hình công nghiệp hoá của các nước tư bản cổ điển bắt đầu từ:",
+  a: [
+    { text: "Công nghiệp nặng.", correct: false },
+    { text: "Công nghiệp chế tạo.", correct: false },
+    { text: "Công nghiệp nhẹ.", correct: true },
+    { text: "Tất cả đều đúng.", correct: false }
+  ]
+},
+
+// 194
+{
+  q: "Mô hình công nghiệp hóa của Liên Xô (cũ):",
+  a: [
+    { text: "Ưu tiên công nghiệp nhẹ.", correct: false },
+    { text: "Ưu tiên công nghiệp nặng.", correct: true },
+    { text: "Ưu tiên công nghiệp chế tạo.", correct: false },
+    { text: "Tất cả đều đúng.", correct: false }
+  ]
+},
+
+// 195
+{
+  q: "Mô hình công nghiệp hoá của Nhật Bản và các nước NICs:",
+  a: [
+    { text: "Đẩy mạnh xuất khẩu.", correct: false },
+    { text: "Thúc đẩy sản xuất thay thế nhập khẩu.", correct: false },
+    { text: "Công nghiệp hóa gắn với hiện đại hóa.", correct: false },
+    { text: "Tất cả đều đúng.", correct: true }
+  ]
+},
+
+// 196
+{
+  q: "Những năm 1960 Việt Nam áp dụng mô hình công nghiệp hoá của:",
+  a: [
+    { text: "Cổ điển.", correct: false },
+    { text: "Liên Xô (cũ).", correct: true },
+    { text: "Nhật Bản.", correct: false },
+    { text: "NICs.", correct: false }
+  ]
+},
+
+// 197
+{
+  q: "Quan điểm của Đảng ta về công nghiệp hoá, hiện đại hoá trong bối cảnh 4.0:",
+  a: [
+    { text: "Chủ động chuẩn bị các điều kiện cần thiết, giải phóng mọi nguồn lực.", correct: false },
+    { text: "Thực hiện đồng bộ các giải pháp, phát huy sức sáng tạo.", correct: false },
+    { text: "Phát triển ngành công nghiệp.", correct: false },
+    { text: "Cả A, B.", correct: true }
+  ]
+},
+
+// 198
+{
+  q: "Tác động nào dưới đây không phải tác động tích cực của hội nhập kinh tế quốc tế?",
+  a: [
+    { text: "Mở rộng thị trường, tiếp thu khoa học – công nghệ.", correct: false },
+    { text: "Cạnh tranh gay gắt khiến doanh nghiệp gặp khó khăn, thậm chí phá sản.", correct: true },
+    { text: "Tạo cơ hội nâng cao chất lượng nhân lực.", correct: false },
+    { text: "Thúc đẩy hội nhập văn hóa, chính trị.", correct: false }
+  ]
+},
+
+// 199
+{
+  q: "Nền kinh tế độc lập tự chủ là:",
+  a: [
+    { text: "Không bị lệ thuộc về đường lối nhưng bị áp đặt qua tài chính.", correct: false },
+    { text: "Không bị lệ thuộc và không bị bất cứ ai áp đặt làm tổn hại chủ quyền.", correct: true },
+    { text: "Lệ thuộc đường lối nhưng không bị áp đặt.", correct: false },
+    { text: "Lệ thuộc nhưng không tổn hại chủ quyền.", correct: false }
+  ]
+},
+
+// 200
+{
+  q: "Thực chất của công nghiệp hóa ở nước ta là gì?",
+  a: [
+    { text: "Thay lao động thủ công bằng máy móc hiện đại.", correct: true },
+    { text: "Tăng trưởng kinh tế.", correct: false },
+    { text: "Hội nhập quốc tế.", correct: false },
+    { text: "Mở rộng sản xuất.", correct: false }
+  ]
+},
+
+    ];
+
+    let questions = [];
+    let current = 0;
+
+    function shuffle(arr) {
+        return arr.sort(() => Math.random() - 0.5);
+    }
+
+    function startQuiz() {
+        const f = parseInt(document.getElementById("from").value) - 1;
+        const t = parseInt(document.getElementById("to").value);
+
+        questions = allQuestions.slice(f, t);
+        questions = shuffle(questions);
+
+        document.getElementById("settings").style.display = "none";
+        document.getElementById("quiz-box").style.display = "block";
+
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (questions.length === 0) {
+            document.getElementById("quiz-box").innerHTML = "<h2>Bạn đã hoàn thành tất cả câu đúng! 🎉</h2>";
+            return;
+        }
+
+        current = 0;
+
+        const q = questions[current];
+        document.getElementById("question").innerText = q.q;
+
+        let shuffledAnswers = shuffle([...q.a]);
+        let answersDiv = document.getElementById("answers");
+        answersDiv.innerHTML = "";
+        document.getElementById("result").innerText = "";
+
+        shuffledAnswers.forEach(a => {
+            const div = document.createElement("div");
+            div.className = "answer";
+            div.innerText = a.text;
+
+            div.onclick = () => {
+                if (a.correct) {
+                    div.classList.add("correct");
+                    document.getElementById("result").innerText = "Đúng rồi! ✔";
+
+                    setTimeout(() => {
+                        questions.shift();  
+                        loadQuestion();
+                    }, 800);
+
+                } else {
+                    div.classList.add("wrong");
+                    document.getElementById("result").innerText = "Sai rồi ❌";
+
+                    let wrong = questions.shift();
+                    questions.push(wrong);
+
+                    setTimeout(() => {
+                        loadQuestion();
+                    }, 800);
+                }
+
+                document.querySelectorAll(".answer").forEach(btn => {
+                    btn.style.pointerEvents = "none";
+                });
+            };
+
+            answersDiv.appendChild(div);
+        });
+    }
+</script>
+
+</body>
+</html>
